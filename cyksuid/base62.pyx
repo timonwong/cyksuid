@@ -21,26 +21,25 @@ cdef i8[128] table_a2b_base62 = [
 
 
 cdef inline size_t conversion_len_bound(size_t length, size_t src_base, size_t dst_base):
-    out = <double>length * log(<double>src_base) / log(<double>dst_base)
+    cdef double out = <double>length * log(<double>src_base) / log(<double>dst_base)
     return <size_t>out + 1
 
 
 # Change the base of a byte string representing a big-endian encoded arbitrary-size unsigned integer.
 cdef size_t change_base(u8[] dst, size_t dst_len, u8[] src, size_t src_len, size_t src_base, size_t dst_base):
     cdef size_t i
-    cdef size_t off
-    cdef size_t num_len
     cdef ldiv_t quot_rem
+    cdef long int acc
 
-    off = dst_len
-    num_len = src_len
+    cdef size_t off = dst_len
+    cdef size_t num_len = src_len
 
     while num_len > 0:
         i = 0
         quot_rem.quot = quot_rem.rem = 0
 
         for j in range(num_len):
-            acc = src_base * quot_rem.rem + src[j]
+            acc = quot_rem.rem * src_base + src[j]
             quot_rem = ldiv(acc, dst_base)
 
             if i != 0 or quot_rem.quot != 0:
@@ -55,7 +54,7 @@ cdef size_t change_base(u8[] dst, size_t dst_len, u8[] src, size_t src_len, size
 
 
 cdef inline size_t encode_raw(u8[] dst, size_t dst_len, u8[] src, size_t src_len):
-    off = change_base(dst, dst_len, src, src_len, 256, 62)
+    cdef size_t off = change_base(dst, dst_len, src, src_len, 256, 62)
 
     for i in range(dst_len):
         dst[i] = table_b2a_base62[dst[i]]
@@ -65,6 +64,9 @@ cdef inline size_t encode_raw(u8[] dst, size_t dst_len, u8[] src, size_t src_len
 
 cdef inline size_t decode_raw(u8[] dst, size_t dst_len, u8[] src, size_t src_len):
     # Map each ascii-encoded Base62 character to its binary value.
+    cdef u8 ch
+    cdef i8 b
+
     for i in range(src_len):
         ch = <u8>src[i]
         if ch & 0x80 != 0:
@@ -95,6 +97,7 @@ cpdef bytes b62encode(bytes s):
 
 
 cpdef bytes b62decode(bytes s):
+    cdef size_t off
     cdef bytearray src = bytearray(s)
     cdef size_t dst_len = conversion_len_bound(len(s), 62, 256)
     cdef u8* dst = <u8*>PyMem_Malloc(dst_len)
