@@ -28,7 +28,9 @@ def test_encode_and_decode_base62():
 def test_lexicographic_ordering():
     unsorted_strings = []
     for i in range(256):
-        s = base62.b62encode(b'\x00' + chr(i))
+        b = bytearray((0, i))
+        b = bytes(b)
+        s = base62.b62encode(b)
         unsorted_strings.append(b'0' * (2 - len(s)) + s)
     unsorted_strings.sort()
 
