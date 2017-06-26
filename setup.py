@@ -46,7 +46,7 @@ else:
 
 
 ext_modules = []
-for modname in ['base62', 'ksuid']:
+for modname in ['fast_base62', 'ksuid']:
     ext_modules.append(Extension('cyksuid.' + modname.replace('/', '.'),
                                  ['cyksuid/' + modname + suffix]))
 
@@ -82,8 +82,6 @@ setup(
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
-        'Intended Audience :: Education',
-        'Intended Audience :: Science/Research',
         'License :: OSI Approved :: BSD License',
         'Operating System :: OS Independent',
         'Programming Language :: Cython',

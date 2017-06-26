@@ -20,3 +20,6 @@ script:
 
 notifications:
   email: false
+
+cache:
+  pip: true

@@ -1,0 +1,11 @@
+include setup.py README.rst MANIFEST.in LICENSE
+include cyksuid/cbase62.c
+include cyksuid/*.pyx
+include cyksuid/*.pxd
+
+global-exclude *.pyc
+global-exclude *.pyd
+global-exclude *.pyo
+global-exclude *.so
+global-exclude .git*
+global-exclude *~

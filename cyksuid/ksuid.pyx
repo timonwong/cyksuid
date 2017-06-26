@@ -4,11 +4,10 @@ import os
 import struct
 import time
 
-from cyksuid cimport base62
-
-from libc.string cimport memset
 from cpython.version cimport PY_MAJOR_VERSION
-from cpython.bytes cimport PyBytes_FromStringAndSize
+
+from cyksuid.fast_base62 cimport fast_b62decode
+from cyksuid.fast_base62 cimport fast_b62encode
 
 DEF _BYTE_LENGTH = 20
 DEF _STRING_ENCODED_LENGTH = 27
@@ -59,7 +58,7 @@ cdef class KSUID(object):
 
     @property
     def encoded(self):
-        return _to_encoded(self._data)
+        return fast_b62encode(self._bytes)
 
     def __hash__(self):
         return hash(self._data)
@@ -68,7 +67,7 @@ cdef class KSUID(object):
         return 'KSUID(%r)' % str(self)
 
     def __str__(self):
-        s = _to_encoded(self._data)
+        s = fast_b62encode(self._bytes)
         if PY_MAJOR_VERSION >= 3:
             return s.decode('ascii')
         return s
@@ -79,35 +78,26 @@ cdef class KSUID(object):
     def __richcmp__(KSUID self, object other, int op):
         if not isinstance(other, KSUID):
             return NotImplemented
+
+        cdef KSUID that = <KSUID>other
         if op == 0:  # <
-            return self.bytes < other.bytes
+            return self._bytes < that._bytes
         elif op == 2:  # ==
-            return self.bytes == other.bytes
+            return self._bytes == that._bytes
         elif op == 4:  # >
-            return self.bytes > other.bytes
+            return self._bytes > that._bytes
         elif op == 1:  # <=
-            return self.bytes <= other.bytes
+            return self._bytes <= that._bytes
         elif op == 3:  # !=
-            return self.bytes != other.bytes
+            return self._bytes != that._bytes
         elif op == 5:  # >=
-            return self.bytes >= other.bytes
+            return self._bytes >= other._bytes
 
     def __setattr__(self, name, value):
         raise TypeError('KSUID objects are immutable')
 
     def __delattr__(self, name):
         raise TypeError('KSUID objects are immutable')
-
-
-
-cdef inline bytes _to_encoded(bytes data):
-    cdef bytearray src = bytearray(data)
-    cdef unsigned char[_STRING_ENCODED_LENGTH] dst
-
-    memset(dst, 0, _STRING_ENCODED_LENGTH)
-    base62.encode_raw(dst, _STRING_ENCODED_LENGTH, src, len(src))
-    decoded = PyBytes_FromStringAndSize(<char *>dst, _STRING_ENCODED_LENGTH)
-    return decoded
 
 
 def from_bytes(bytes s):
@@ -129,14 +119,7 @@ cpdef parse(bytes s):
     if len(s) != _STRING_ENCODED_LENGTH:
         raise TypeError("invalid encoded KSUID string")
 
-    cdef bytearray src = bytearray(s)
-    cdef unsigned char[_BYTE_LENGTH] dst
-
-    memset(dst, 0, _BYTE_LENGTH)
-    base62.decode_raw(dst, _BYTE_LENGTH, src, len(src))
-    cdef bytes decoded = PyBytes_FromStringAndSize(<char *>dst, _BYTE_LENGTH)
-
-    return from_bytes(decoded)
+    return from_bytes(fast_b62decode(s))
 
 
 # Represents a completely empty (invalid) KSUID
