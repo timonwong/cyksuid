@@ -34,31 +34,31 @@ cdef class KSUID(object):
         # Remove padding
         self._data = s.lstrip(b'\x00')
 
-    @property
-    def datetime(self):
-        """Returns timestamp portion of the ID as a datetime.datetime object."""
-        ts = self.timestamp
-        return datetime.datetime.utcfromtimestamp(ts + _EPOCH_STAMP)
+    property datetime:
+        def __get__(self):
+            """Returns timestamp portion of the ID as a datetime.datetime object."""
+            ts = self.timestamp
+            return datetime.datetime.utcfromtimestamp(ts + _EPOCH_STAMP)
 
-    @property
-    def timestamp(self):
-        return struct.unpack('>i', self._bytes[:_TIMESTAMP_LENGTH])[0]
+    property timestamp:
+        def __get__(self):
+            return struct.unpack('>i', self._bytes[:_TIMESTAMP_LENGTH])[0]
 
-    @property
-    def payload(self):
-        return self._bytes[:_BODY_LENGTH]
+    property payload:
+        def __get__(self):
+            return self._bytes[:_BODY_LENGTH]
 
-    @property
-    def bytes(self):
-        return self._bytes
+    property bytes:
+        def __get__(self):
+            return self._bytes
 
-    @property
-    def hex(self):
-        return binascii.b2a_hex(self._bytes)
+    property hex:
+        def __get__(self):
+            return binascii.b2a_hex(self._bytes)
 
-    @property
-    def encoded(self):
-        return fast_b62encode(self._bytes)
+    property encoded:
+        def __get__(self):
+            return fast_b62encode(self._bytes)
 
     def __hash__(self):
         return hash(self._data)
