@@ -8,7 +8,7 @@ Cython implementation of KSUID_(K-Sortable Globally Unique IDs).
 LICENSE
 -------
 
-New BSD. See `License File <https://github.com/timonwong/cyksuid/blob/master/LICENSE.txt>`__.
+New BSD. See `License File <https://github.com/timonwong/cyksuid/blob/master/LICENSE>`__.
 
 Install
 -------
