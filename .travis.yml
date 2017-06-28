@@ -1,22 +1,23 @@
 sudo: false
 language: python
 python:
-    - "2.6"
-    - "2.7"
-    - "3.3"
-    - "3.4"
-    - "3.5"
-    - "3.6"
+  - "2.6"
+  - "2.7"
+  - "3.3"
+  - "3.4"
+  - "3.5"
+  - "3.6"
 
 before_install:
-    - pip install cython pytest
+  - pip install 'pip==9.0.1'
+  - pip install cython pytest
 
 install:
-    - python setup.py build_ext --inplace --with-cython
+  - python setup.py build_ext --inplace --with-cython
 
 # commands to run tests
 script:
-    - PYTHONPATH=. py.test -v tests
+  - PYTHONPATH=. py.test -v tests
 
 notifications:
   email: false
