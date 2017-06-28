@@ -22,6 +22,8 @@ MAX_ENCODED = b"aWgEPTl1tmebfsQzFP4bxwgy80V"
 
 
 cdef class KSUID(object):
+    """"KSUIDs are 20bytes contains 4 byte timestamp with custom epoch and 16 bytes randomness."""
+
     cdef bytes _bytes
     cdef bytes _data
 
@@ -35,28 +37,34 @@ cdef class KSUID(object):
         self._data = s.lstrip(b'\x00')
 
     property datetime:
+        """Timestamp portion of the ID as a datetime.datetime object."""
         def __get__(self):
-            """Returns timestamp portion of the ID as a datetime.datetime object."""
+
             ts = self.timestamp
             return datetime.datetime.utcfromtimestamp(ts + _EPOCH_STAMP)
 
     property timestamp:
+        """Timestamp portion of the ID in seconds."""
         def __get__(self):
             return struct.unpack('>i', self._bytes[:_TIMESTAMP_LENGTH])[0]
 
     property payload:
+        """Payload portion of the ID."""
         def __get__(self):
             return self._bytes[:_BODY_LENGTH]
 
     property bytes:
+        """Raw bytes representation of the ID."""
         def __get__(self):
             return self._bytes
 
     property hex:
+        """Hex encoded representation of the ID."""
         def __get__(self):
             return binascii.b2a_hex(self._bytes)
 
     property encoded:
+        """Base62 encoded representation of the ID."""
         def __get__(self):
             return fast_b62encode(self._bytes)
 
@@ -101,21 +109,30 @@ cdef class KSUID(object):
 
 
 def from_bytes(bytes s):
+    """Construct KSUID from raw bytes."""
     return KSUID(s)
 
 
 def from_parts(int timestamp, bytes payload):
+    """Construct KSUID from timestamp."""
+    timestamp -= _EPOCH_STAMP
     s = struct.pack('>i', timestamp) + payload
     return KSUID(s)
 
 
 def ksuid(time_func=time.time, rand_fuc=os.urandom):
-    timestamp = int(time_func()) - _EPOCH_STAMP
+    """Factory to construct KSUID objects.
+
+    :param callable time_func: function for generating time, defaults to time.time.
+    :param callable rand_func: function for generating random bytes, defaults to os.urandom.
+    """
+    timestamp = int(time_func())
     payload = rand_fuc(_BODY_LENGTH)
     return from_parts(timestamp, payload)
 
 
 cpdef parse(bytes s):
+    """Parse KSUID from a base62 encoded string."""
     if len(s) != _STRING_ENCODED_LENGTH:
         raise TypeError("invalid encoded KSUID string")
 
