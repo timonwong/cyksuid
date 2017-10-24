@@ -43,6 +43,9 @@ def test_parse():
     parsed = ksuid.parse(b'0' * ksuid.STRING_ENCODED_LENGTH)
     assert parsed == ksuid.Empty
 
+    parsed = ksuid.parse(u'0' * ksuid.STRING_ENCODED_LENGTH)
+    assert parsed == ksuid.Empty
+
     max_bytes_ksuid = ksuid.from_bytes(b'\xff' * ksuid.BYTE_LENGTH)
     max_parse_ksuid = ksuid.parse(ksuid.MAX_ENCODED)
 
