@@ -24,3 +24,7 @@ notifications:
 
 cache:
   pip: true
+
+branches:
+  only:
+  - master

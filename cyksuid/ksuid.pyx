@@ -22,11 +22,6 @@ MAX_ENCODED = b"aWgEPTl1tmebfsQzFP4bxwgy80V"
 
 
 cdef class KSUID(object):
-    """"KSUIDs are 20bytes contains 4 byte timestamp with custom epoch and 16 bytes randomness."""
-
-    cdef bytes _bytes
-    cdef bytes _data
-
     def __init__(self, bytes s):
         if not s:
             s = b'\x00' * _BYTE_LENGTH
@@ -108,12 +103,12 @@ cdef class KSUID(object):
         raise TypeError('KSUID objects are immutable')
 
 
-def from_bytes(bytes s):
+cpdef KSUID from_bytes(bytes s):
     """Construct KSUID from raw bytes."""
     return KSUID(s)
 
 
-def from_parts(int timestamp, bytes payload):
+cpdef KSUID from_parts(int timestamp, bytes payload):
     """Construct KSUID from timestamp."""
     timestamp -= _EPOCH_STAMP
     s = struct.pack('>i', timestamp) + payload
@@ -131,7 +126,7 @@ def ksuid(time_func=time.time, rand_fuc=os.urandom):
     return from_parts(timestamp, payload)
 
 
-cpdef parse(s):
+cpdef KSUID parse(s):
     """Parse KSUID from a base62 encoded string."""
     if isinstance(s, unicode):
         s = (<unicode>s).encode('utf-8')
