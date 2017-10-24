@@ -1,1 +1,1 @@
-cpdef parse(bytes s)
+cpdef parse(s)

@@ -131,8 +131,10 @@ def ksuid(time_func=time.time, rand_fuc=os.urandom):
     return from_parts(timestamp, payload)
 
 
-cpdef parse(bytes s):
+cpdef parse(s):
     """Parse KSUID from a base62 encoded string."""
+    if isinstance(s, unicode):
+        s = (<unicode>s).encode('utf-8')
     if len(s) != _STRING_ENCODED_LENGTH:
         raise TypeError("invalid encoded KSUID string")
 
