@@ -2,6 +2,7 @@
 .cache/
 build/
 dist/
+wheelhouse/
 *.egg-info
 
 *.so
