@@ -1,6 +1,7 @@
 import os.path
 import sys
 from setuptools import setup, Extension
+from distutils import ccompiler, msvccompiler
 
 
 info = {}
@@ -45,10 +46,17 @@ else:
     suffix = '.c'
 
 
+include_dirs = []
+if ccompiler.new_compiler().compiler_type == 'msvc' and msvccompiler.get_build_version() == 9:
+    root = os.path.abspath(os.path.dirname(__file__))
+    include_dirs.append(os.path.join(root, 'include', 'msvc9'))
+
+
 ext_modules = []
 for modname in ['fast_base62', 'ksuid']:
     ext_modules.append(Extension('cyksuid.' + modname.replace('/', '.'),
-                                 ['cyksuid/' + modname + suffix]))
+                                 ['cyksuid/' + modname + suffix],
+                                 include_dirs=include_dirs))
 
 
 if use_cython:

@@ -1,0 +1,73 @@
+environment:
+  PYPI_USERNAME:
+    secure: WmAbQg/GQXggsqUZLDFO/Q==
+  PYPI_PASSWORD:
+    secure: Wwb9J4Z4yrV0c3UpCePa6w==
+  matrix:
+    # For Python versions available on Appveyor, see
+    # http://www.appveyor.com/docs/installed-software#python
+    - PYTHON: "C:\\Python27"
+      DISTRIBUTIONS: "bdist_wheel"
+    - PYTHON: "C:\\Python27-x64"
+      DISTRIBUTIONS: "bdist_wheel"
+    - PYTHON: "C:\\Python34"
+      DISTRIBUTIONS: "bdist_wheel"
+    # We have problems building Python34-x64
+    # - PYTHON: "C:\\Python34-x64"
+    #   DISTRIBUTIONS: "bdist_wheel"
+    - PYTHON: "C:\\Python35"
+      DISTRIBUTIONS: "bdist_wheel"
+    - PYTHON: "C:\\Python35-x64"
+      DISTRIBUTIONS: "bdist_wheel"
+    - PYTHON: "C:\\Python36"
+      DISTRIBUTIONS: "bdist_wheel"
+    - PYTHON: "C:\\Python36-x64"
+      DISTRIBUTIONS: "bdist_wheel"
+
+install:
+  # We need wheel installed to build wheels
+  - "%PYTHON%\\python.exe -m pip install wheel"
+  - "%PYTHON%\\python.exe -m pip install twine"
+  - "%PYTHON%\\python.exe -m pip install cython"
+  - "%PYTHON%\\python.exe -m pip install pytest"
+  - '%PYTHON%\\python.exe -m pip install -e . --install-option="--with-cython"'
+
+build: off
+
+test_script:
+  # Put your test command here.
+  # If you don't need to build C extensions on 64-bit Python 3.4,
+  # you can remove "build.cmd" from the front of the command, as it's
+  # only needed to support those cases.
+  # Note that you must use the environment variable %PYTHON% to refer to
+  # the interpreter you're using - Appveyor does not do anything special
+  # to put the Python version you want to use on PATH.
+  - "%PYTHON%\\python.exe -m pytest tests/"
+
+after_test:
+  # This step builds your wheels.
+  # Again, you only need build.cmd if you're building C extensions for
+  # 64-bit Python 3.4. And you need to use %PYTHON% to get the correct
+  # interpreter
+  - "%PYTHON%\\python.exe setup.py %DISTRIBUTIONS%"
+
+artifacts:
+  # bdist_wheel puts your built wheel in the dist directory
+  - path: dist\*
+
+#on_success:
+#  - TODO: upload the content of dist/*.whl to a public wheelhouse
+
+deploy_script:
+  - echo "Starting Artifact Deployment"
+  # populate pypirc file for twine
+  - echo [distutils]                                  > %USERPROFILE%\\.pypirc
+  - echo index-servers =                             >> %USERPROFILE%\\.pypirc
+  - echo     pypi                                    >> %USERPROFILE%\\.pypirc
+  - echo [pypi]                                      >> %USERPROFILE%\\.pypirc
+  - echo username=%PYPI_USERNAME%                    >> %USERPROFILE%\\.pypirc
+  - echo password=%PYPI_PASSWORD%                    >> %USERPROFILE%\\.pypirc
+  # upload to pypi for windows
+  - set HOME=%USERPROFILE%
+  - ps: If ($env:APPVEYOR_REPO_TAG -eq "true" -And $env:APPVEYOR_REPO_BRANCH -eq "master") { Invoke-Expression "twine upload --skip-existing dist/*.whl" 2>$null } Else { write-output "Not on a tag on master, won't deploy to pypi"}
+  - echo "Finished Artifact Deployment"
