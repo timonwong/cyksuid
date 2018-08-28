@@ -54,11 +54,9 @@ after_test:
 artifacts:
   # bdist_wheel puts your built wheel in the dist directory
   - path: dist\*
+    name: wheels
 
-#on_success:
-#  - TODO: upload the content of dist/*.whl to a public wheelhouse
-
-deploy_script:
+on_success:
   - echo "Starting Artifact Deployment"
   # populate pypirc file for twine
   - echo [distutils]                                  > %USERPROFILE%\\.pypirc
