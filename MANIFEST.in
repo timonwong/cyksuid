@@ -2,6 +2,7 @@ include setup.py README.rst MANIFEST.in LICENSE
 include cyksuid/cbase62.c
 include cyksuid/*.pyx
 include cyksuid/*.pxd
+recursive-include include *.h
 
 global-exclude *.pyc
 global-exclude *.pyd

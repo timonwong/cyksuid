@@ -1,7 +1,7 @@
 CyKSUID
 =======
 
-Cython implementation of KSUID_(K-Sortable Globally Unique IDs).
+Cython implementation of KSUID_ (K-Sortable Globally Unique IDs).
 
 .. _KSUID: https://github.com/segmentio/ksuid
 
@@ -13,7 +13,7 @@ New BSD. See `License File <https://github.com/timonwong/cyksuid/blob/master/LIC
 Install
 -------
 
-``cyksuid`` is on the Python Package Index (PyPI):
+``cyksuid`` is on the Python Package Index (`PyPI <https://pypi.org/project/cyksuid>`__):
 
 ::
 
