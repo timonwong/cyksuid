@@ -23,6 +23,10 @@ environment:
       DISTRIBUTIONS: "bdist_wheel"
     - PYTHON: "C:\\Python36-x64"
       DISTRIBUTIONS: "bdist_wheel"
+    - PYTHON: "C:\\Python37"
+      DISTRIBUTIONS: "bdist_wheel"
+    - PYTHON: "C:\\Python37-x64"
+      DISTRIBUTIONS: "bdist_wheel"
 
 install:
   # We need wheel installed to build wheels

@@ -5,9 +5,8 @@ from distutils import ccompiler, msvccompiler
 
 
 info = {}
-filename = os.path.join('cyksuid', '_version.py')
-exec(compile(open(filename, "rb").read().replace(b'\r\n', b'\n'),
-             filename, 'exec'), info)
+filename = os.path.join('cyksuid', '__version__.py')
+exec(compile(open(filename, "rb").read().replace(b'\r\n', b'\n'), filename, 'exec'), info)
 VERSION = info['__version__']
 
 
@@ -85,10 +84,9 @@ setup(
     package_data={
         'cyksuid': ['*.pyx', '*.pxd'],
     },
-    # include_package_data = True,
     keywords='ksuid',
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
         'Operating System :: OS Independent',
@@ -102,6 +100,7 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'Topic :: Scientific/Engineering',
         'Topic :: Software Development',
         'Topic :: Software Development :: Libraries',

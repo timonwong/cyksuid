@@ -115,14 +115,14 @@ cpdef KSUID from_parts(int timestamp, bytes payload):
     return KSUID(s)
 
 
-def ksuid(time_func=time.time, rand_fuc=os.urandom):
+def ksuid(time_func=time.time, rand_func=os.urandom):
     """Factory to construct KSUID objects.
 
     :param callable time_func: function for generating time, defaults to time.time.
     :param callable rand_func: function for generating random bytes, defaults to os.urandom.
     """
     timestamp = int(time_func())
-    payload = rand_fuc(_BODY_LENGTH)
+    payload = rand_func(_BODY_LENGTH)
     return from_parts(timestamp, payload)
 
 
