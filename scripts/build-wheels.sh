@@ -3,7 +3,7 @@ set -e -x
 
 # Compile wheels
 for PYBIN in /opt/python/*/bin; do
-    "${PYBIN}/pip" install -i http://pypi.doubanio.com/simple --trusted-host pypi.doubanio.com cython
+    "${PYBIN}/pip" install cython
     "${PYBIN}/pip" wheel /io/ -w wheelhouse/
 done
 
