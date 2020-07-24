@@ -64,3 +64,13 @@ def test_ordering():
     x2 = ksuid.ksuid(time_func=lambda: cur_time + 1)
     assert x1 < x2
 
+
+def test_issue_10():
+    # https://github.com/timonwong/cyksuid/issues/10
+    inputs = [
+        b"aaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        b"aWgEPTl1tmebfsQzFP4bxwgy80!",
+    ]
+    for s in inputs:
+        with pytest.raises(ValueError):
+            ksuid.parse(s)
