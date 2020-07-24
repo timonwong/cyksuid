@@ -134,7 +134,7 @@ int ksuid_b62_decode(unsigned char *dst, size_t dst_size, const char *src, size_
     }
 
     // Add 'zeros' at the head of the destination buffer for all bytes that were not set
-    if (dst_size && dst_size <= _BASE62_BYTE_LENGTH) {
+    if (dst_size && dst_size <= _BASE62_BYTE_SIZE) {
         memset(dst, 0, dst_size);
     }
 
