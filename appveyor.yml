@@ -5,7 +5,7 @@ environment:
     secure: Wwb9J4Z4yrV0c3UpCePa6w==
   matrix:
     # For Python versions available on Appveyor, see
-    # http://www.appveyor.com/docs/installed-software#python
+    # https://www.appveyor.com/docs/windows-images-software/#python
     - PYTHON: "C:\\Python27"
       DISTRIBUTIONS: "bdist_wheel"
     - PYTHON: "C:\\Python27-x64"
@@ -27,11 +27,17 @@ environment:
       DISTRIBUTIONS: "bdist_wheel"
     - PYTHON: "C:\\Python37-x64"
       DISTRIBUTIONS: "bdist_wheel"
+    - PYTHON: "C:\\Python38"
+      DISTRIBUTIONS: "bdist_wheel"
+    - PYTHON: "C:\\Python38-x64"
+      DISTRIBUTIONS: "bdist_wheel"
+      # For Python 3.8, we need a different image, check out available pre-installed Python
+      # and Visual Studio versions: https://www.appveyor.com/docs/linux-images-software/
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
 
 install:
   # We need wheel installed to build wheels
   - "%PYTHON%\\python.exe -m pip install wheel"
-  - "%PYTHON%\\python.exe -m pip install readme-renderer==24.0 Pygments==2.3.1 twine==1.15.0"
   - "%PYTHON%\\python.exe -m pip install cython"
   - "%PYTHON%\\python.exe -m pip install pytest"
   - '%PYTHON%\\python.exe -m pip install -e . --install-option="--with-cython"'
@@ -60,8 +66,7 @@ artifacts:
   - path: dist\*
     name: wheels
 
-on_success:
-  - echo "Starting Artifact Deployment"
+deploy_script:
   # populate pypirc file for twine
   - echo [distutils]                                  > %USERPROFILE%\\.pypirc
   - echo index-servers =                             >> %USERPROFILE%\\.pypirc
@@ -71,5 +76,13 @@ on_success:
   - echo password=%PYPI_PASSWORD%                    >> %USERPROFILE%\\.pypirc
   # upload to pypi for windows
   - set HOME=%USERPROFILE%
-  - ps: If ($env:APPVEYOR_REPO_TAG -eq "true" -And $env:APPVEYOR_REPO_BRANCH -eq "master") { Invoke-Expression "twine upload --skip-existing dist/*.whl" 2>$null } Else { write-output "Not on a tag on master, won't deploy to pypi"}
-  - echo "Finished Artifact Deployment"
+  - ps: ls dist
+  - ps: >-
+      if ( ($env:APPVEYOR_REPO_BRANCH -eq 'master') -and ($env:APPVEYOR_REPO_TAG -eq 'true') -and
+      ($env:APPVEYOR_REPO_TAG_NAME -match '^v[0-9]+\.[0-9]+\.[0-9]+') ) {
+        Write-Output ("Deploying tag: " + $env:APPVEYOR_REPO_TAG_NAME + " to PyPI ...")
+        Invoke-Expression "%PYTHON%/python.exe -m pip install readme-renderer==24.0 Pygments==2.3.1 twine==1.15.0"
+        Invoke-Expression "twine upload --skip-existing --non-interactive --verbose dist/*.whl"
+      } else {
+        Write-Output ("Skipped deployment to PyPI as this is not a tagged commit.")
+      }
