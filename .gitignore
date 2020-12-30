@@ -5,6 +5,7 @@
 build/
 dist/
 wheelhouse/
+__pycache__/
 
 .envrc
 *.egg-info
