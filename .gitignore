@@ -1,9 +1,11 @@
 .vscode/
 .idea/
 .cache/
+.direnv/
 build/
 dist/
 wheelhouse/
-*.egg-info
 
+.envrc
+*.egg-info
 *.so
