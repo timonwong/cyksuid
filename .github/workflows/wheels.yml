@@ -43,6 +43,8 @@ on:
       - setup.py
       - .github/workflows/wheels.yml
   release:
+    types:
+      - created
 
 env:
   cython: "0.29.21"
