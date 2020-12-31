@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+      branches:
+        - master
+
+jobs:
+  checks:
+    name: Checks
+    runs-on: ubuntu-20.04
+
+    strategy:
+      matrix:
+        include:
+          - python_version: '2.7'
+          - python_version: '3.5'
+          - python_version: '3.6'
+          - python_version: '3.7'
+          - python_version: '3.8'
+          - python_version: '3.9'
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: setup python
+        uses: actions/setup-python@v2
+        with:
+            python-version: "${{ matrix.python_version }}"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip wheel
+          pip install cython pytest
+
+      - name: Build
+        run: |
+          python setup.py build_ext --inplace
+
+      - name: Test
+        run: |
+          PYTHONPATH=. pytest -v tests

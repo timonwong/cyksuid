@@ -12,7 +12,7 @@ before_install:
   - pip install cython pytest
 
 install:
-  - python setup.py build_ext --inplace --with-cython
+  - python setup.py build_ext --inplace
 
 # commands to run tests
 script:
