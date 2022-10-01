@@ -20,8 +20,7 @@ except ImportError:
     HAS_CYTHON = False
 
 
-IS_DEV = "dev" in VERSION
-USE_CYTHON = IS_DEV or "--cython" in sys.argv or "--with-cython" in sys.argv
+USE_CYTHON = "--cython" in sys.argv or "--with-cython" in sys.argv
 
 if "--no-cython" in sys.argv:
     USE_CYTHON = False
@@ -35,8 +34,6 @@ if "--with-cython" in sys.argv:
     sys.argv.remove("--with-cython")
 
 if USE_CYTHON and not HAS_CYTHON:
-    if IS_DEV:
-        raise RuntimeError("Cython required to build dev version of cyksuid.")
     print("WARNING: Cython not installed.  Building without Cython.")
     USE_CYTHON = False
 
