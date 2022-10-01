@@ -109,6 +109,11 @@ jobs:
               build: "cp*"
 
           - os: macos-11
+            name: mac-pypy
+            cibw:
+              build: "pp*"
+
+          - os: macos-11
             name: mac-arm
             cibw:
               arch: universal2
@@ -136,6 +141,12 @@ jobs:
             architecture: x86
             cibw:
               build: "cp*win32"
+
+          - os: windows-2019
+            name: win-pypy
+            architecture: x64
+            cibw:
+              build: "pp*win_amd64"
 
           - os: windows-2019
             name: win_amd64
