@@ -23,7 +23,7 @@ Install
 Dependencies
 ------------
 
-``cyksuid`` supports Python 2.7+ and Python 3.5+ with a common codebase.
+``cyksuid`` supports Python 3.6+ with a common codebase.
 It is developed in Cython, but requires no dependecies other than CPython
 and a C compiler.
 

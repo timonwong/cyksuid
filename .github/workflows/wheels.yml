@@ -45,10 +45,9 @@ on:
   release:
     types:
       - created
+  workflow_dispatch: {}
 
 env:
-  cython: "0.29.21"
-  cibuildwheel: "1.6.4"
   TWINE_NONINTERACTIVE: "1"
 
 jobs:
@@ -56,22 +55,24 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: setup python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v3
         with:
           python-version: "3.8"
 
       - name: install dependencies
         run: |
           pip install --upgrade pip build
-          pip install cython=="${{ env.cython }}"
+          pip install -r tools/wheel-requirements.txt
+
       - name: build sdist
         run: |
           python setup.py build --with-cython
           python -m build --sdist .
-      - uses: actions/upload-artifact@v2
+
+      - uses: actions/upload-artifact@v3
         with:
           name: sdist
           path: "dist/*.tar.gz"
@@ -90,75 +91,99 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     env:
+      MACOSX_DEPLOYMENT_TARGET: "10.9"
       CIBW_TEST_REQUIRES: "pytest"
       CIBW_TEST_COMMAND: "pytest -v {package}/tests"
-      CIBW_SKIP: "cp2* cp35* pp2*"
       CIBW_BUILD: "${{ matrix.cibw.build || '*' }}"
-      CIBW_MANYLINUX_X86_64_IMAGE: "${{ matrix.cibw.manylinux_image }}"
-      CIBW_MANYLINUX_I686_IMAGE: "${{ matrix.cibw.manylinux_image }}"
+      CIBW_SKIP: "${{ matrix.cibw.skip || '' }}"
+      CIBW_ARCHS_LINUX: "${{ matrix.cibw.arch || 'auto' }}"
+      CIBW_ARCHS_MACOS: "${{ matrix.cibw.arch || 'auto' }}"
 
     strategy:
       fail-fast: false
       matrix:
         include:
-          - os: macos-10.15
-            name: mac
+          - os: macos-11
+            name: mac-cpython
+            cibw:
+              build: "cp*"
+
+          - os: macos-11
+            name: mac-arm
+            cibw:
+              arch: universal2
+              build: "cp*"
 
           - os: ubuntu-20.04
-            name: manylinux1
+            name: manylinux-x86_64
             cibw:
-              build: "cp36* cp37*"
-              manylinux_image: manylinux1
+              arch: x86_64
+              build: "*manylinux*"
 
           - os: ubuntu-20.04
-            name: manylinux2010
+            name: manylinux-i686
             cibw:
-              build: "cp38* cp39*"
-              manylinux_image: manylinux2010
+              arch: i686
+              build: "*manylinux*"
+
+          - os: ubuntu-20.04
+            name: musllinux
+            cibw:
+              build: "*musllinux*"
 
           - os: windows-2019
             name: win32
+            architecture: x86
             cibw:
-              build: "*win32"
+              build: "cp*win32"
 
           - os: windows-2019
             name: win_amd64
+            architecture: x64
             cibw:
-              build: "*win_amd64"
+              build: "cp*win_amd64"
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: setup python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v3
         with:
           python-version: "3.8"
+          architecture: ${{ matrix.architecture }}
+
+      - name: customize mac-arm-64
+        if: contains(matrix.os, 'macos') && matrix.cibw.arch
+        run: |
+          echo 'MACOSX_DEPLOYMENT_TARGET=10.15' >> "$GITHUB_ENV"
 
       - name: install dependencies
         run: |
-          pip install --upgrade pip wheel
-          pip install cibuildwheel=="${{ env.cibuildwheel }}" cython=="${{ env.cython }}"
-      - name: install mac dependencies
-        if: startsWith(matrix.os, 'mac')
-        run: |
-          pip install delocate
-      - name: install linux dependencies
-        if: startsWith(matrix.os, 'ubuntu')
-        run: |
-          pip install auditwheel
+          pip install --upgrade setuptools pip wheel
+          pip install -r tools/wheel-requirements.txt
+
       - name: show environment
         run: |
           pip freeze
+
       - name: list target wheels
         run: |
           python -m cibuildwheel . --print-build-identifiers
+
       - name: compile Cython sources
         run: |
           python setup.py build --with-cython
+
+      - name: clean build
+        if: contains(matrix.os, 'windows') == false
+        run: |
+          rm -rf build
+
       - name: build wheels
         run: |
           python -m cibuildwheel .
-      - uses: actions/upload-artifact@v2
+
+      - uses: actions/upload-artifact@v3
         with:
           name: wheels-${{ matrix.name }}
           path: "wheelhouse/*"
