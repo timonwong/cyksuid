@@ -1,5 +1,6 @@
 import os.path
 import sys
+from xml.etree.ElementInclude import include
 from setuptools import setup, Extension
 from distutils import ccompiler, msvccompiler
 
@@ -44,7 +45,7 @@ else:
     suffix = ".c"
 
 
-include_dirs = []
+include_dirs = ["cyksuid"]
 if (
     ccompiler.new_compiler().compiler_type == "msvc"
     and msvccompiler.get_build_version() == 9
@@ -53,15 +54,18 @@ if (
     include_dirs.append(os.path.join(root, "include", "msvc9"))
 
 
-ext_modules = []
-for modname in ["fast_base62", "ksuid"]:
-    ext_modules.append(
-        Extension(
-            "cyksuid." + modname.replace("/", "."),
-            ["cyksuid/" + modname + suffix],
-            include_dirs=include_dirs,
-        )
-    )
+ext_modules = [
+    Extension(
+        "cyksuid.fast_base62",
+        sources=["cyksuid/fast_base62" + suffix, "cyksuid/cbase62.c"],
+        include_dirs=include_dirs,
+    ),
+    Extension(
+        "cyksuid.ksuid",
+        sources=["cyksuid/ksuid" + suffix],
+        include_dirs=include_dirs,
+    ),
+]
 
 
 if USE_CYTHON:
@@ -87,9 +91,10 @@ setup(
     license="BSD",
     packages=["cyksuid"],
     package_data={
-        "cyksuid": ["*.pyx", "*.pxd"],
+        "cyksuid": ["*.pyx", "*.pxd", "*.pyi", "py.typed"],
     },
     keywords="ksuid",
+    python_requires=">=3.6",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",

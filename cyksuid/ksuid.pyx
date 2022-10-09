@@ -1,7 +1,5 @@
-import binascii
 import datetime
 import os
-import struct
 import time
 
 from cpython.version cimport PY_MAJOR_VERSION
@@ -40,7 +38,7 @@ cdef class KSUID(object):
     @property
     def timestamp(self):
         """Timestamp portion of the ID in seconds."""
-        return struct.unpack('>i', self._bytes[:_TIMESTAMP_LENGTH])[0]
+        return int.from_bytes(self._bytes[:_TIMESTAMP_LENGTH], 'big')
 
     @property
     def payload(self):
@@ -55,7 +53,7 @@ cdef class KSUID(object):
     @property
     def hex(self):
         """Hex encoded representation of the ID."""
-        return binascii.b2a_hex(self._bytes)
+        return self._bytes.hex()
 
     @property
     def encoded(self):
@@ -69,6 +67,7 @@ cdef class KSUID(object):
         return 'KSUID(%r)' % str(self)
 
     def __str__(self):
+        cdef bytes s
         s = fast_b62encode(self._bytes)
         if PY_MAJOR_VERSION >= 3:
             return s.decode('ascii')
@@ -110,7 +109,7 @@ cpdef KSUID from_bytes(bytes s):
 cpdef KSUID from_parts(int timestamp, bytes payload):
     """Construct KSUID from timestamp."""
     timestamp -= _EPOCH_STAMP
-    s = struct.pack('>i', timestamp) + payload
+    s = timestamp.to_bytes(4, 'big') + payload
     return KSUID(s)
 
 

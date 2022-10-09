@@ -1,6 +1,7 @@
-#include <stddef.h>
 #include <string.h>
 #include <stdint.h>
+
+#include "cbase62.h"
 
 // Error Codes
 #define ERR_B62_INSUFFICIENT_OUTPUT_BUFFER -1
