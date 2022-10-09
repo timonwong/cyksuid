@@ -31,37 +31,36 @@ cdef class KSUID(object):
         # Remove padding
         self._data = s.lstrip(b'\x00')
 
-    property datetime:
+    @property
+    def datetime(self):
         """Timestamp portion of the ID as a datetime.datetime object."""
-        def __get__(self):
+        ts = self.timestamp
+        return datetime.datetime.utcfromtimestamp(ts + _EPOCH_STAMP)
 
-            ts = self.timestamp
-            return datetime.datetime.utcfromtimestamp(ts + _EPOCH_STAMP)
-
-    property timestamp:
+    @property
+    def timestamp(self):
         """Timestamp portion of the ID in seconds."""
-        def __get__(self):
-            return struct.unpack('>i', self._bytes[:_TIMESTAMP_LENGTH])[0]
+        return struct.unpack('>i', self._bytes[:_TIMESTAMP_LENGTH])[0]
 
-    property payload:
+    @property
+    def payload(self):
         """Payload portion of the ID."""
-        def __get__(self):
-            return self._bytes[:_BODY_LENGTH]
+        return self._bytes[:_BODY_LENGTH]
 
-    property bytes:
+    @property
+    def bytes(self):
         """Raw bytes representation of the ID."""
-        def __get__(self):
-            return self._bytes
+        return self._bytes
 
-    property hex:
+    @property
+    def hex(self):
         """Hex encoded representation of the ID."""
-        def __get__(self):
-            return binascii.b2a_hex(self._bytes)
+        return binascii.b2a_hex(self._bytes)
 
-    property encoded:
+    @property
+    def encoded(self):
         """Base62 encoded representation of the ID."""
-        def __get__(self):
-            return fast_b62encode(self._bytes)
+        return fast_b62encode(self._bytes)
 
     def __hash__(self):
         return hash(self._data)
@@ -94,7 +93,7 @@ cdef class KSUID(object):
         elif op == 3:  # !=
             return self._bytes != that._bytes
         elif op == 5:  # >=
-            return self._bytes >= other._bytes
+            return self._bytes >= that._bytes
 
     def __setattr__(self, name, value):
         raise TypeError('KSUID objects are immutable')
@@ -115,12 +114,16 @@ cpdef KSUID from_parts(int timestamp, bytes payload):
     return KSUID(s)
 
 
-def ksuid(time_func=time.time, rand_func=os.urandom):
+def ksuid(time_func=None, rand_func=None):
     """Factory to construct KSUID objects.
 
     :param callable time_func: function for generating time, defaults to time.time.
     :param callable rand_func: function for generating random bytes, defaults to os.urandom.
     """
+    if time_func is None:
+        time_func = time.time
+    if rand_func is None:
+        rand_func = os.urandom
     timestamp = int(time_func())
     payload = rand_func(_BODY_LENGTH)
     return from_parts(timestamp, payload)
