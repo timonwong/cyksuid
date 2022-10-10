@@ -112,7 +112,7 @@ cpdef KSUID from_parts(int64_t timestamp, bytes payload):
     """Construct KSUID from timestamp."""
     cdef uint32_t ts = <uint32_t>(timestamp - _EPOCH_STAMP)
     cdef size_t payload_len = len(payload)
-    cdef size_t buf_size = 4 + payload_len
+    cdef size_t buf_size = _TIMESTAMP_LENGTH + payload_len
     cdef uint8_t* buf = <uint8_t *>PyMem_Malloc(buf_size * sizeof(uint8_t))
     if not buf:
         raise MemoryError()
@@ -123,7 +123,7 @@ cpdef KSUID from_parts(int64_t timestamp, bytes payload):
     buf[2] = (ts >> 8) & 0xff
     buf[3] = (ts >> 0) & 0xff
     # extend with payload
-    memcpy(&buf[4], <const uint8_t*>(payload), payload_len)
+    memcpy(&buf[_TIMESTAMP_LENGTH], <const uint8_t*>(payload), payload_len)
 
     # Convert to bytes, and KSUID
     try:
