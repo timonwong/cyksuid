@@ -32,6 +32,7 @@ cdef class KSUID(object):
     @property
     def datetime(self):
         """Timestamp portion of the ID as a datetime.datetime object."""
+        cdef unsigned int ts
         ts = self.timestamp
         return datetime.datetime.utcfromtimestamp(ts + _EPOCH_STAMP)
 
