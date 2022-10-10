@@ -5,7 +5,9 @@ svix_timer = timeit.timeit(
     "k = gen()", setup="from ksuid import Ksuid; gen = Ksuid", number=rounds
 )
 cyksuid_timer = timeit.timeit(
-    "k = gen()", setup="from cyksuid import ksuid; gen = ksuid.ksuid", number=rounds
+    "k = gen()",
+    setup="from cyksuid import ksuid; gen = ksuid.ksuid",
+    number=rounds,
 )
 
 delta = (cyksuid_timer - svix_timer) / svix_timer

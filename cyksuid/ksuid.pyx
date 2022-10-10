@@ -1,10 +1,10 @@
 import datetime
 import os
-import time
 
 cimport cython
 from cpython.mem cimport PyMem_Malloc, PyMem_Free
 from libc.string cimport memcpy
+from libc.time cimport time as ctime
 
 from cyksuid.fast_base62 cimport _fast_b62decode, _fast_b62encode
 
@@ -138,11 +138,18 @@ def ksuid(time_func=None, rand_func=None):
     :param callable time_func: function for generating time, defaults to time.time.
     :param callable rand_func: function for generating random bytes, defaults to os.urandom.
     """
+
+    cdef int64_t timestamp
+    cdef double ts_frac
+
     if time_func is None:
-        time_func = time.time
+        timestamp = ctime(NULL)
+    else:
+        ts_frac = time_func()
+        timestamp = <int64_t>int(ts_frac)
+
     if rand_func is None:
         rand_func = os.urandom
-    cdef int64_t timestamp = <int64_t>int(time_func())
     cdef bytes payload = rand_func(_BODY_LENGTH)
     return from_parts(timestamp, payload)
 
