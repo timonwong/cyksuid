@@ -5,6 +5,7 @@ _bytestr = bytes
 
 BYTE_LENGTH: int
 STRING_ENCODED_LENGTH: int
+EMPTY_BYTES: bytes
 MAX_ENCODED: bytes
 
 class KSUID:
@@ -15,6 +16,7 @@ class KSUID:
     def __lt__(self, other: object) -> bool: ...
     def __le__(self, other: object) -> bool: ...
     def __eq__(self, other: object) -> bool: ...
+
     @property
     def datetime(self) -> datetime.datetime: ...
     @property

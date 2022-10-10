@@ -1,7 +1,7 @@
 CyKSUID
 =======
 
-Cython implementation of KSUID_ (K-Sortable Globally Unique IDs).
+A high performance Cython implementation of KSUID_ (K-Sortable Globally Unique IDs).
 
 .. _KSUID: https://github.com/segmentio/ksuid
 
