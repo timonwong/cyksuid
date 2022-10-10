@@ -82,7 +82,7 @@ def test_string_methods() -> None:
     x = ksuid.ksuid(time_func=lambda: 1601693907, rand_func=dummy_rand_func)
     assert str(x) == "1iLjkFPvDHNs6h5VYEZXhMmSaWX"
     assert repr(x) == "KSUID('1iLjkFPvDHNs6h5VYEZXhMmSaWX')"
-    assert x.hex == '0c059ad311111111111111111111111111111111'
+    assert x.hex == "0c059ad311111111111111111111111111111111"
 
 
 def test_issue_10() -> None:

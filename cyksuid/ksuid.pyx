@@ -23,24 +23,12 @@ MAX_ENCODED = b"aWgEPTl1tmebfsQzFP4bxwgy80V"
 
 
 cdef class KSUID(object):
-    def __init__(self, const uint8_t[:] s):
-        cdef size_t n = len(s)
-        cdef bytes buf
-        if s is None or n == 0:
-            s = EMPTY_BYTES
-        elif n != _BYTE_LENGTH:
+    def __init__(self, bytes s):
+        if not s:
+            s = b'\x00' * _BYTE_LENGTH
+        if len(s) != _BYTE_LENGTH:
             raise TypeError("not a valid ksuid bytes")
-
-        # Remove padding
-        cdef int i, start_idx = 0
-        with cython.boundscheck(False):
-            for i in range(_BYTE_LENGTH):
-                if s[i] != 0:
-                    break
-                start_idx += 1
-
-        self._bytes = bytes(s[:])
-        self._data = self._bytes[start_idx:]
+        self._bytes = s
 
     @property
     def datetime(self):
@@ -75,7 +63,7 @@ cdef class KSUID(object):
         return _fast_b62encode(self._bytes, len(self._bytes))
 
     def __hash__(self):
-        return hash(self._data)
+        return hash(self._bytes)
 
     def __repr__(self):
         return 'KSUID(%r)' % str(self)
@@ -84,8 +72,8 @@ cdef class KSUID(object):
         cdef bytes s = _fast_b62encode(self._bytes, len(self._bytes))
         return s.decode('ascii')
 
-    def __len__(self):
-        return len(self._data)
+    def __bool__(self):
+        return self != Empty
 
     def __richcmp__(KSUID self, object other, int op):
         if not isinstance(other, KSUID):
