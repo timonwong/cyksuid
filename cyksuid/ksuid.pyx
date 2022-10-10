@@ -65,6 +65,9 @@ cdef class KSUID(object):
     def __hash__(self):
         return hash(self._bytes)
 
+    def __bytes__(self):
+        return self._bytes
+
     def __repr__(self):
         return 'KSUID(%r)' % str(self)
 

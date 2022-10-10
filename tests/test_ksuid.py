@@ -32,6 +32,7 @@ def test_encoding() -> None:
 def test_padding() -> None:
     x = ksuid.from_bytes(b"\xff" * ksuid.BYTE_LENGTH)
     x_encoded = x.bytes
+    assert x_encoded == bytes(x)
     empty_encoded = ksuid.Empty.bytes
     assert len(x_encoded) == len(
         empty_encoded
