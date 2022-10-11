@@ -9,10 +9,10 @@ python:
 
 before_install:
   - pip install -U pip build
-  - pip install cython pytest
+  - pip install -r test-requirements.txt
 
 install:
-  - python setup.py build_ext --inplace --with-cython
+  - 'python setup.py build_ext --inplace --with-cython'
 
 # commands to run tests
 script:
