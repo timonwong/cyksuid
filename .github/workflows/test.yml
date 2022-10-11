@@ -1,0 +1,106 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request: {}
+  workflow_dispatch: {}
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+
+    env:
+      MACOSX_DEPLOYMENT_TARGET: "10.14"
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-11
+            python: 3.6
+
+          - os: macos-11
+            python: "3.10"
+
+          - os: macos-11
+            python: pypy-3.8
+
+          - os: ubuntu-18.04
+            python: 3.6
+
+          - os: ubuntu-20.04
+            python: pypy-3.8
+
+          - os: ubuntu-20.04
+            python: pypy-3.7
+
+          - os: ubuntu-20.04
+            python: 3.7
+
+          - os: ubuntu-20.04
+            python: 3.9
+
+          - os: ubuntu-20.04
+            python: "3.10"
+
+          - os: ubuntu-20.04
+            python: "3.11.0-rc.1"
+
+          - os: ubuntu-20.04
+            python: 3.8
+
+          - os: windows-2019
+            python: 3.6
+            arch: x86
+
+          - os: windows-2019
+            python: 3.9
+            arch: x64
+
+          - os: windows-2019
+            python: "3.10"
+            arch: x64
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: setup python
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python }}
+          architecture: ${{ matrix.arch || 'x64' }}
+
+      - name: install dependencies
+        run: |
+          pip install --upgrade pip wheel
+          pip install -r test-requirements.txt
+
+      - name: show environment
+        run: |
+          pip freeze
+
+      # preserve pip cache to speed up installation
+      - name: Cache pip
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          # Look to see if there is a cache hit for the corresponding requirements file
+          key: ${{ runner.os }}-pip-${{ runner.python }}-${{ hashFiles('*requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: run coverage
+        if: startsWith(matrix.python, 'pypy') == false
+        run: |
+          make coverage
+
+      - name: run tests
+        if: startsWith(matrix.python, 'pypy')
+        run: |
+          make test
+
+      - name: upload coverage
+        run: codecov
