@@ -1,10 +1,10 @@
-from ksuid import Ksuid
-from cyksuid import ksuid
+from ksuid import Ksuid as SvixKsuid
+from cyksuid._ksuid import ksuid as _new_ksuid
 
 
 def test_cyksuid(benchmark):
-    benchmark(ksuid.ksuid)
+    benchmark(_new_ksuid)
 
 
 def test_svix_ksuid(benchmark):
-    benchmark(Ksuid)
+    benchmark(SvixKsuid)

@@ -1,9 +1,12 @@
+from distutils import util
 import os
 import os.path
+import re
+import pkg_resources
 import sys
+import sysconfig
 from typing import Any, Dict, List, Tuple
 from setuptools import setup, Extension
-from distutils import ccompiler, msvccompiler
 
 IS_DEBUG = os.getenv("CY_DEBUG", "")
 
@@ -12,7 +15,7 @@ ext_cythonize_kwargs: Dict[str, Any] = {
     "force": True,
     "compiler_directives": {},
 }
-ext_include_dirs = []
+ext_include_dirs = ["ksuidlib/include"]
 
 if IS_DEBUG == "1":
     print("Build in debug mode")
@@ -64,30 +67,57 @@ if USE_CYTHON and not HAS_CYTHON:
 if USE_CYTHON:
     suffix = ".pyx"
 else:
-    suffix = ".c"
+    suffix = ".cc"
 
+extra_compile_args: List[str] = []
+if sys.platform != "win32":
+    extra_compile_args.append("-Wno-write-strings")
+    extra_compile_args.append("-Wno-invalid-offsetof")
+    extra_compile_args.append("-Wno-sign-compare")
+    extra_compile_args.append("-Wno-unused-variable")
+    extra_compile_args.append("-std=c++14")
 
-ext_include_dirs += ["cyksuid"]
-if (
-    ccompiler.new_compiler().compiler_type == "msvc"
-    and msvccompiler.get_build_version() == 9
-):
-    root = os.path.abspath(os.path.dirname(__file__))
-    ext_include_dirs.append(os.path.join(root, "include", "msvc9"))
+if sys.platform == "darwin":
+    extra_compile_args.append("-Wno-shorten-64-to-32")
+    extra_compile_args.append("-Wno-deprecated-register")
 
+    # https://developer.apple.com/documentation/xcode_release_notes/xcode_10_release_notes
+    # C++ projects must now migrate to libc++ and are recommended to set a
+    # deployment target of macOS 10.9 or later, or iOS 7 or later.
+    if sys.platform == "darwin":
+        mac_target = str(sysconfig.get_config_var("MACOSX_DEPLOYMENT_TARGET"))
+        if mac_target and (
+            pkg_resources.parse_version(mac_target)
+            < pkg_resources.parse_version("10.9.0")
+        ):
+            os.environ["MACOSX_DEPLOYMENT_TARGET"] = "10.9"
+            os.environ["_PYTHON_HOST_PLATFORM"] = re.sub(
+                r"macosx-[0-9]+\.[0-9]+-(.+)", r"macosx-10.9-\1", util.get_platform()
+            )
+
+# MSVS default is dymanic
+if sys.platform == "win32":
+    extra_compile_args.append("/MT")
+
+if "clang" in os.popen("$CC --version 2> /dev/null").read():
+    extra_compile_args.append("-Wno-shorten-64-to-32")
 
 ext_modules = [
     Extension(
         "cyksuid.fast_base62",
-        sources=["cyksuid/fast_base62" + suffix, "cyksuid/cbase62.c"],
+        sources=["cyksuid/fast_base62" + suffix, "cyksuid/cbase62.cc"],
         define_macros=ext_macros,
         include_dirs=ext_include_dirs,
+        extra_compile_args=extra_compile_args,
+        language="c++",
     ),
     Extension(
-        "cyksuid.ksuid",
-        sources=["cyksuid/ksuid" + suffix],
+        "cyksuid._ksuid",
+        sources=["cyksuid/_ksuid" + suffix],
         define_macros=ext_macros,
         include_dirs=ext_include_dirs,
+        extra_compile_args=extra_compile_args,
+        language="c++",
     ),
 ]
 
@@ -105,7 +135,7 @@ if USE_CYTHON:
 
 setup(
     name="cyksuid",
-    version="2.0.0dev",
+    version="2.0.0.dev",
     description="Cython implementation of ksuid",
     ext_modules=ext_modules,
     long_description=(

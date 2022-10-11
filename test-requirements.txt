@@ -11,3 +11,6 @@ pytest-benchmark
 pytest-cov==2.10.*
 
 pytest-rerunfailures
+
+# Development dependencies
+types-setuptools

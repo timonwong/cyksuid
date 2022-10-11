@@ -20,6 +20,7 @@ def test_empty() -> None:
     assert not bool(ksuid.Empty)
     x = ksuid.from_bytes(b"\x00" * ksuid.BYTE_LENGTH)
     assert x == ksuid.Empty
+    assert not x
 
 
 def test_encoding() -> None:
@@ -44,9 +45,6 @@ def test_parse() -> None:
         ksuid.parse(b"123")
 
     parsed = ksuid.parse(b"0" * ksuid.STRING_ENCODED_LENGTH)
-    assert parsed == ksuid.Empty
-
-    parsed = ksuid.parse("0" * ksuid.STRING_ENCODED_LENGTH)
     assert parsed == ksuid.Empty
 
     max_bytes_ksuid = ksuid.from_bytes(b"\xff" * ksuid.BYTE_LENGTH)

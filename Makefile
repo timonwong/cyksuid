@@ -1,10 +1,10 @@
+.PHONY: build
+build:
+	unset CY_DEBUG; python setup.py build_ext --inplace --with-cython
+
 .PHONY: build-debug
 build-debug:
 	export CY_DEBUG=1; python setup.py build_ext --inplace --with-cython
-
-.PHOHY: build
-build:
-	unset CY_DEBUG; python setup.py build_ext --inplace --with-cython
 
 .PHONY: coverage
 coverage: build-debug
@@ -20,4 +20,5 @@ test: build
 
 .PHONY: bench
 bench: build
+	pip install svix-ksuid
 	pytest bench.py --benchmark-json bench.json && jq '.benchmarks[] | {name, "mean": .stats["mean"]} ' bench.json
