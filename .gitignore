@@ -11,3 +11,5 @@ __pycache__/
 .envrc
 *.egg-info
 *.so
+*.html
+bench.json

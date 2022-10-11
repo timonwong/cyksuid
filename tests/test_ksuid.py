@@ -32,6 +32,7 @@ def test_encoding() -> None:
 def test_padding() -> None:
     x = ksuid.from_bytes(b"\xff" * ksuid.BYTE_LENGTH)
     x_encoded = x.bytes
+    assert x_encoded == bytes(x)
     empty_encoded = ksuid.Empty.bytes
     assert len(x_encoded) == len(
         empty_encoded
@@ -78,10 +79,11 @@ def test_ordering() -> None:
     assert x2 > x3
 
 
-def test_repr_and_str() -> None:
+def test_string_methods() -> None:
     x = ksuid.ksuid(time_func=lambda: 1601693907, rand_func=dummy_rand_func)
     assert str(x) == "1iLjkFPvDHNs6h5VYEZXhMmSaWX"
     assert repr(x) == "KSUID('1iLjkFPvDHNs6h5VYEZXhMmSaWX')"
+    assert x.hex == "0c059ad311111111111111111111111111111111"
 
 
 def test_issue_10() -> None:

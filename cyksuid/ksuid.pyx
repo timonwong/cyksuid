@@ -1,13 +1,11 @@
-import binascii
 import datetime
 import os
-import struct
-import time
 
-from cpython.version cimport PY_MAJOR_VERSION
+from cpython.mem cimport PyMem_Malloc, PyMem_Free
+from libc.string cimport memcpy
+from libc.time cimport time as ctime
 
-from cyksuid.fast_base62 cimport fast_b62decode
-from cyksuid.fast_base62 cimport fast_b62encode
+from cyksuid.fast_base62 cimport _fast_b62decode, _fast_b62encode
 
 DEF _BYTE_LENGTH = 20
 DEF _STRING_ENCODED_LENGTH = 27
@@ -17,6 +15,8 @@ DEF _EPOCH_STAMP = 1400000000
 
 BYTE_LENGTH = _BYTE_LENGTH
 STRING_ENCODED_LENGTH = _STRING_ENCODED_LENGTH
+# Empty KSUID sequence
+EMPTY_BYTES = b'\x00' * _BYTE_LENGTH
 # A bytes-encoded maximum value for a KSUID
 MAX_ENCODED = b"aWgEPTl1tmebfsQzFP4bxwgy80V"
 
@@ -28,19 +28,18 @@ cdef class KSUID(object):
         if len(s) != _BYTE_LENGTH:
             raise TypeError("not a valid ksuid bytes")
         self._bytes = s
-        # Remove padding
-        self._data = s.lstrip(b'\x00')
 
     @property
     def datetime(self):
         """Timestamp portion of the ID as a datetime.datetime object."""
-        ts = self.timestamp
-        return datetime.datetime.utcfromtimestamp(ts + _EPOCH_STAMP)
+        # cdef int64_t ts = <int64_t>self.timestamp
+        ts = self.timestamp + _EPOCH_STAMP
+        return datetime.datetime.utcfromtimestamp(ts)
 
     @property
     def timestamp(self):
         """Timestamp portion of the ID in seconds."""
-        return struct.unpack('>i', self._bytes[:_TIMESTAMP_LENGTH])[0]
+        return int.from_bytes(self._bytes[:_TIMESTAMP_LENGTH], 'big')
 
     @property
     def payload(self):
@@ -55,27 +54,28 @@ cdef class KSUID(object):
     @property
     def hex(self):
         """Hex encoded representation of the ID."""
-        return binascii.b2a_hex(self._bytes)
+        return self._bytes.hex()
 
     @property
     def encoded(self):
         """Base62 encoded representation of the ID."""
-        return fast_b62encode(self._bytes)
+        return _fast_b62encode(self._bytes, len(self._bytes))
 
     def __hash__(self):
-        return hash(self._data)
+        return hash(self._bytes)
+
+    def __bytes__(self):
+        return self._bytes
 
     def __repr__(self):
         return 'KSUID(%r)' % str(self)
 
     def __str__(self):
-        s = fast_b62encode(self._bytes)
-        if PY_MAJOR_VERSION >= 3:
-            return s.decode('ascii')
-        return s
+        cdef bytes s = _fast_b62encode(self._bytes, len(self._bytes))
+        return s.decode('ascii')
 
-    def __len__(self):
-        return len(self._data)
+    def __bool__(self):
+        return self != Empty
 
     def __richcmp__(KSUID self, object other, int op):
         if not isinstance(other, KSUID):
@@ -107,11 +107,28 @@ cpdef KSUID from_bytes(bytes s):
     return KSUID(s)
 
 
-cpdef KSUID from_parts(int timestamp, bytes payload):
+cpdef KSUID from_parts(int64_t timestamp, bytes payload):
     """Construct KSUID from timestamp."""
-    timestamp -= _EPOCH_STAMP
-    s = struct.pack('>i', timestamp) + payload
-    return KSUID(s)
+    cdef uint32_t ts = <uint32_t>(timestamp - _EPOCH_STAMP)
+    cdef size_t payload_len = len(payload)
+    cdef size_t buf_size = _TIMESTAMP_LENGTH + payload_len
+    cdef uint8_t* buf = <uint8_t *>PyMem_Malloc(buf_size * sizeof(uint8_t))
+    if not buf:
+        raise MemoryError()
+
+    # big endian representation of ts
+    buf[0] = (ts >> 24) & 0xff
+    buf[1] = (ts >> 16) & 0xff
+    buf[2] = (ts >> 8) & 0xff
+    buf[3] = (ts >> 0) & 0xff
+    # extend with payload
+    memcpy(&buf[_TIMESTAMP_LENGTH], <const uint8_t*>(payload), payload_len)
+
+    # Convert to bytes, and KSUID
+    try:
+        return KSUID(buf[:buf_size])
+    finally:
+        PyMem_Free(buf)
 
 
 def ksuid(time_func=None, rand_func=None):
@@ -120,24 +137,38 @@ def ksuid(time_func=None, rand_func=None):
     :param callable time_func: function for generating time, defaults to time.time.
     :param callable rand_func: function for generating random bytes, defaults to os.urandom.
     """
+
+    cdef int64_t timestamp
+    cdef double ts_frac
+
     if time_func is None:
-        time_func = time.time
+        timestamp = ctime(NULL)
+    else:
+        ts_frac = time_func()
+        timestamp = <int64_t>int(ts_frac)
+
     if rand_func is None:
         rand_func = os.urandom
-    timestamp = int(time_func())
-    payload = rand_func(_BODY_LENGTH)
+    cdef bytes payload = rand_func(_BODY_LENGTH)
     return from_parts(timestamp, payload)
 
 
-cpdef KSUID parse(s):
+cpdef KSUID parse(object s):
     """Parse KSUID from a base62 encoded string."""
-    if isinstance(s, unicode):
-        s = (<unicode>s).encode('utf-8')
-    if len(s) != _STRING_ENCODED_LENGTH:
+    cdef bytes buf
+    if isinstance(s, str):
+        buf = (<str>s).encode('utf-8')
+    elif isinstance(s, bytes):
+        buf = <bytes>s
+    else:
+        raise TypeError("Expected str or bytes, got %r" % type(s))
+
+    buf_size = len(buf)
+    if buf_size != _STRING_ENCODED_LENGTH:
         raise TypeError("invalid encoded KSUID string")
 
-    return from_bytes(fast_b62decode(s))
+    return from_bytes(_fast_b62decode(buf, buf_size))
 
 
 # Represents a completely empty (invalid) KSUID
-Empty = KSUID(b'')
+Empty = KSUID(EMPTY_BYTES)
