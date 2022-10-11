@@ -3,6 +3,7 @@ include cyksuid/py.typed
 include cyksuid/cbase62.*
 recursive-include cyksuid *.pyx *.pxd *.pyi
 recursive-include include *.h
+recursive-include src *
 
 global-exclude *.pyc
 global-exclude *.pyd

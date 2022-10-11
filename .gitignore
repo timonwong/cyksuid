@@ -13,3 +13,7 @@ __pycache__/
 *.so
 *.html
 bench.json
+
+.coverage
+coverage.xml
+cython_debug

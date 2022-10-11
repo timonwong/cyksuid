@@ -5,18 +5,20 @@ from cpython.mem cimport PyMem_Malloc, PyMem_Free
 from libc.string cimport memcpy
 from libc.time cimport time as ctime
 
+from cyksuid.fast_base62 cimport BASE62_BYTE_LENGTH, BASE62_ENCODED_LENGTH
 from cyksuid.fast_base62 cimport _fast_b62decode, _fast_b62encode
 
-DEF _BYTE_LENGTH = 20
-DEF _STRING_ENCODED_LENGTH = 27
-DEF _TIMESTAMP_LENGTH = 4
-DEF _BODY_LENGTH = 16
-DEF _EPOCH_STAMP = 1400000000
 
-BYTE_LENGTH = _BYTE_LENGTH
-STRING_ENCODED_LENGTH = _STRING_ENCODED_LENGTH
+cdef enum:
+    _TIMESTAMP_LENGTH = 4
+    _BODY_LENGTH = 16
+    _EPOCH_STAMP = 1400000000
+
+
+BYTE_LENGTH = BASE62_BYTE_LENGTH
+STRING_ENCODED_LENGTH = BASE62_ENCODED_LENGTH
 # Empty KSUID sequence
-EMPTY_BYTES = b'\x00' * _BYTE_LENGTH
+EMPTY_BYTES = b'\x00' * BASE62_BYTE_LENGTH
 # A bytes-encoded maximum value for a KSUID
 MAX_ENCODED = b"aWgEPTl1tmebfsQzFP4bxwgy80V"
 
@@ -24,8 +26,8 @@ MAX_ENCODED = b"aWgEPTl1tmebfsQzFP4bxwgy80V"
 cdef class KSUID(object):
     def __init__(self, bytes s):
         if not s:
-            s = b'\x00' * _BYTE_LENGTH
-        if len(s) != _BYTE_LENGTH:
+            s = EMPTY_BYTES
+        if len(s) != BASE62_BYTE_LENGTH:
             raise TypeError("not a valid ksuid bytes")
         self._bytes = s
 
@@ -114,7 +116,7 @@ cpdef KSUID from_parts(int64_t timestamp, bytes payload):
     cdef size_t buf_size = _TIMESTAMP_LENGTH + payload_len
     cdef uint8_t* buf = <uint8_t *>PyMem_Malloc(buf_size * sizeof(uint8_t))
     if not buf:
-        raise MemoryError()
+        raise MemoryError()  # pragma: no cover
 
     # big endian representation of ts
     buf[0] = (ts >> 24) & 0xff
@@ -128,7 +130,7 @@ cpdef KSUID from_parts(int64_t timestamp, bytes payload):
     try:
         return KSUID(buf[:buf_size])
     finally:
-        PyMem_Free(buf)
+        PyMem_Free(buf)  # pragma: no cover
 
 
 def ksuid(time_func=None, rand_func=None):
@@ -164,7 +166,7 @@ cpdef KSUID parse(object s):
         raise TypeError("Expected str or bytes, got %r" % type(s))
 
     buf_size = len(buf)
-    if buf_size != _STRING_ENCODED_LENGTH:
+    if buf_size != BASE62_ENCODED_LENGTH:
         raise TypeError("invalid encoded KSUID string")
 
     return from_bytes(_fast_b62decode(buf, buf_size))

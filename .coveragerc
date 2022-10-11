@@ -1,0 +1,12 @@
+[run]
+plugins = Cython.Coverage
+source = cyksuid
+parallel = True
+branch = False
+omit =
+    tests
+
+[report]
+exclude_lines =
+    pragma: no cover
+ignore_errors = True
