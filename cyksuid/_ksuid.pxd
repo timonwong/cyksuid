@@ -21,21 +21,14 @@ cdef extern from "ksuidlite.h" nogil:
         bint operator==(KsuidLite)
         bint operator!=(KsuidLite)
 
-    cdef cppclass KsuidImpl[T](KsuidLite):
-        KsuidImpl()
-
-    # workaround: https://stackoverflow.com/a/41200186
-    cdef cppclass _ks_type_base "4":
-        pass
-    cdef cppclass _ks_type_svix "5":
-        pass
-    cdef cppclass _ks_type_48bit "6":
+    cdef cppclass _Ksuid "Ksuid"(KsuidLite):
         pass
 
+    cdef cppclass _KsuidSvix "KsuidSvix"(KsuidLite):
+        pass
 
-ctypedef KsuidImpl[_ks_type_base]   _Ksuid
-ctypedef KsuidImpl[_ks_type_svix]   _KsuidSvix
-ctypedef KsuidImpl[_ks_type_48bit]  _Ksuid48
+    cdef cppclass _Ksuid48 "Ksuid48"(KsuidLite):
+        pass
 
 
 cdef class _KsuidMixin(object):

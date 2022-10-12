@@ -179,3 +179,7 @@ public:
 private:
   std::array<uint8_t, _BYTE_SIZE> _data;
 };
+
+typedef KsuidImpl<4> Ksuid;
+typedef KsuidImpl<5> KsuidSvix;
+typedef KsuidImpl<6> Ksuid48;
