@@ -11,7 +11,7 @@ coverage: build-debug
 	PYTHONPATH=. pytest -v --cov --cov-report=term --cov-report=xml:coverage.xml
 	@for f in $(shell find cyksuid -type f -name "*.pyx"); do \
 		echo "Annotating $${f}"; \
-		cython -3 --annotate-coverage=coverage.xml $${f}; \
+		cython --cplus -3 --annotate-coverage=coverage.xml $${f}; \
 	done
 
 .PHONY: test
