@@ -34,7 +34,7 @@ struct _KL_NOVTABLE KsuidLite {
    */
   virtual void assign(const uint8_t* data, size_t data_size) = 0;
   /**
-   * Construct KSUID from timestamp and payload.
+   * Construct KSUID from timestamp and random.
    *
    * @param ts timestamp in milliseconds;
    * @param payload payload data;
@@ -72,7 +72,6 @@ public:
   KsuidImpl() = default;
 
   void assign(const uint8_t* data, size_t data_size) override {
-
     if (data_size != _BYTE_SIZE) {
       throw std::invalid_argument("data_size must be 20");
     }
@@ -130,7 +129,7 @@ public:
     case 4: // 32-bits, the standard
       break;
     case 5: // 40-bits, svix's
-      ts_ms = static_cast<int64_t>(_data[4]) << 2;
+      ts_ms = (static_cast<int64_t>(_data[4]) << 2) % 1000;
       break;
     case 6: // 48-bits
       ts_ms = (static_cast<int64_t>(_data[4]) << 8) | (static_cast<int64_t>(_data[5]) << 0);

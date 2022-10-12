@@ -1,4 +1,8 @@
-from cyksuid._ksuid import ksuid, parse
-from cyksuid._ksuid import Empty, Ksuid, KsuidSvix, Ksuid48
+from cyksuid._ksuid import Empty, Ksuid, Ksuid48, KsuidSvix, ksuid, parse
 
-__all__ = ["ksuid", "parse", "Empty", "Ksuid", "KsuidSvix", "Ksuid48"]
+
+def from_bytes(raw: bytes) -> Ksuid:
+    return Ksuid(raw)
+
+
+__all__ = ["from_bytes", "ksuid", "parse", "Empty", "Ksuid", "KsuidSvix", "Ksuid48"]

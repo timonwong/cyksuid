@@ -1,19 +1,15 @@
-import datetime
 import os
 import time
+from datetime import datetime, timezone
 
 import cython
-from cpython.mem cimport PyMem_Malloc, PyMem_Free
+
+from cpython.mem cimport PyMem_Free, PyMem_Malloc
 from cython.operator cimport dereference
 from libc.string cimport memcpy
 
-from cyksuid.fast_base62 cimport BASE62_BYTE_LENGTH, BASE62_ENCODED_LENGTH
-from cyksuid.fast_base62 cimport _fast_b62decode, _fast_b62encode
-
-
-cdef enum:
-    _BODY_LENGTH = 16
-
+from cyksuid.fast_base62 cimport (BASE62_BYTE_LENGTH, BASE62_ENCODED_LENGTH,
+                                  _fast_b62decode, _fast_b62encode)
 
 BYTE_LENGTH = BASE62_BYTE_LENGTH
 STRING_ENCODED_LENGTH = BASE62_ENCODED_LENGTH
@@ -25,24 +21,28 @@ MAX_ENCODED = b"aWgEPTl1tmebfsQzFP4bxwgy80V"
 
 @cython.total_ordering
 cdef class _KsuidMixin(object):
+    BASE62_LENGTH = BASE62_ENCODED_LENGTH
+
     def __init__(self, *args, **kwargs):
         cdef bytes data
-        cdef int64_t ts
+        cdef double ts
+        cdef int64_t ts_ms
 
         if len(args) == 0 and len(kwargs) == 0:
             return
         elif len(args) == 1:
             data = args[0]
-            self._uid.assign(data, len(data))
+            self.uid_.assign(data, len(data))
             return
         elif len(args) == 2:
             ts = args[0]
+            ts_ms = <int64_t>(ts * 1000)
             data = args[1]
-            self._uid.assign(ts, data, len(data))
+            self.uid_.assign(ts_ms, data, len(data))
             return
         elif len(args) == 0:
             data = kwargs['payload']
-            self._uid.assign_from_payload(data, len(data))
+            self.uid_.assign_from_payload(data, len(data))
             return
 
         raise ValueError("invalid number of arguments")
@@ -53,38 +53,38 @@ cdef class _KsuidMixin(object):
 
     @classmethod
     def from_timestamp_and_payload(cls, timestamp, payload):
-        return cls(timestamp, payload)
+        return cls(timestamp=timestamp, payload=payload)
 
     @classmethod
-    def from_raw(cls, raw):
+    def from_bytes(cls, raw):
         return cls(raw)
 
     @property
     def datetime(self):
         """Timestamp portion of the ID as a datetime.datetime object."""
         cdef double ts = self.timestamp
-        return datetime.datetime.utcfromtimestamp(ts)
+        return datetime.fromtimestamp(ts, tz=timezone.utc)
 
     @property
     def timestamp_millis(self):
         """Timestamp portion of the ID in milliseconds."""
-        return self._uid.timestamp_millis()
+        return self.uid_.timestamp_millis()
 
     @property
     def timestamp(self):
         """Timestamp portion of the ID in seconds."""
-        return self._uid.timestamp_millis() / 1000.0
+        return self.uid_.timestamp_millis() / 1000.0
 
     @property
     def payload(self):
         """Payload portion of the ID."""
-        cdef MemoryView pv = self._uid.payload()
+        cdef MemoryView pv = self.uid_.payload()
         return pv.data[:pv.size]
 
     @property
     def bytes(self):
         """Raw bytes representation of the ID."""
-        cdef MemoryView pv = self._uid.raw()
+        cdef MemoryView pv = self.uid_.raw()
         return pv.data[:pv.size]
 
     @property
@@ -111,21 +111,21 @@ cdef class _KsuidMixin(object):
         return self.encoded.decode('ascii')
 
     def __bool__(self):
-        return not self._uid.empty()
+        return not self.uid_.empty()
 
     def __lt__(self, other):
         if not isinstance(other, Ksuid):
             return NotImplemented
 
         cdef Ksuid that = <Ksuid>other
-        return dereference(self._uid) < dereference(that._uid)
+        return dereference(self.uid_) < dereference(that.uid_)
 
     def __eq__(self, other):
         if not isinstance(other, Ksuid):
             return NotImplemented
 
         cdef Ksuid that = <Ksuid>other
-        return dereference(self._uid) == dereference(that._uid)
+        return dereference(self.uid_) == dereference(that.uid_)
 
     def __setattr__(self, name, value):
         raise TypeError('Ksuid objects are immutable')
@@ -135,30 +135,39 @@ cdef class _KsuidMixin(object):
 
 
 cdef class Ksuid(_KsuidMixin):
+    PAYLOAD_LENGTH_IN_BYTES = 16
+    TIMESTAMP_LENGTH_IN_BYTES = 4
+
     def __cinit__(self):
-        self._uid = new _Ksuid()
+        self.uid_ = new _Ksuid()
 
     def __dealloc__(self):
-        del self._uid
+        del self.uid_
 
 
 cdef class KsuidSvix(_KsuidMixin):
+    PAYLOAD_LENGTH_IN_BYTES = 15
+    TIMESTAMP_LENGTH_IN_BYTES = 5
+
     def __cinit__(self):
-        self._uid = new _KsuidSvix()
+        self.uid_ = new _KsuidSvix()
 
     def __dealloc__(self):
-        del self._uid
+        del self.uid_
 
 
 cdef class Ksuid48(_KsuidMixin):
+    PAYLOAD_LENGTH_IN_BYTES = 14
+    TIMESTAMP_LENGTH_IN_BYTES = 6
+
     def __cinit__(self):
-        self._uid = new _Ksuid48()
+        self.uid_ = new _Ksuid48()
 
     def __dealloc__(self):
-        del self._uid
+        del self.uid_
 
 
-cpdef ksuid(time_func=None, rand_func=None, ksuid_cls=Ksuid):
+def ksuid(time_func=None, rand_func=None, ksuid_cls=Ksuid):
     """Factory to construct KSUID objects.
 
     :param callable time_func: function for generating time, defaults to time.time.
@@ -169,17 +178,16 @@ cpdef ksuid(time_func=None, rand_func=None, ksuid_cls=Ksuid):
     if rand_func is None:
         rand_func = os.urandom
 
-    cdef bytes payload = rand_func(_BODY_LENGTH)
+    cdef bytes payload = rand_func(ksuid_cls.PAYLOAD_LENGTH_IN_BYTES)
 
     if time_func is None:
         return ksuid_cls(payload=payload)
 
-    cdef double ts_frac = time_func() * 1000
-    cdef int64_t timestamp = <int64_t>int(ts_frac)
-    return ksuid_cls(timestamp, payload)
+    cdef double ts = time_func()
+    return ksuid_cls(ts, payload)
 
 
-cpdef Ksuid parse(object s, object ksuid_cls=None):
+def parse(object s, object ksuid_cls=None):
     """Parse KSUID from a base62 encoded string."""
 
     cdef bytes buf

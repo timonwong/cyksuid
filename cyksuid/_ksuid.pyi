@@ -1,7 +1,5 @@
-from __future__ import annotations
-
-from datetime import datetime
 import functools
+from datetime import datetime
 from typing import Callable, Optional, Type, TypeVar, overload
 
 _bytestr = bytes
@@ -17,21 +15,27 @@ SelfT = TypeVar("SelfT", bound="Ksuid")
 class Ksuid:
     """KSUIDs are 20 bytes contains 4 byte timestamp with custom epoch and 16 bytes randomness."""
 
+    BASE62_LENGTH: int
+    PAYLOAD_LENGTH_IN_BYTES: int
+    TIMESTAMP_LENGTH_IN_BYTES: int
+
     @overload
     def __init__(
         self,
         raw: bytes,
     ) -> None: ...
     @overload
-    def __init__(self, timestamp: int, payload: bytes) -> None: ...
+    def __init__(self, timestamp: int | float, payload: bytes) -> None: ...
+    @overload
+    def __init__(self, payload: bytes) -> None: ...
     @classmethod
     def from_payload(cls: Type[SelfT], payload: bytes) -> SelfT: ...
     @classmethod
     def from_timestamp_and_payload(
-        cls: Type[SelfT], timestamp: int, payload: bytes
+        cls: Type[SelfT], timestamp: int | float, payload: bytes
     ) -> SelfT: ...
     @classmethod
-    def from_raw(cls: Type[SelfT], raw: bytes) -> SelfT: ...
+    def from_bytes(cls: Type[SelfT], raw: bytes) -> SelfT: ...
     def __bool__(self) -> bool: ...
     def __lt__(self, other: object) -> bool: ...
     def __eq__(self, other: object) -> bool: ...

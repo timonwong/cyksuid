@@ -7,17 +7,17 @@ cdef extern from "ksuidlite.h" nogil:
         const size_t size
 
     cdef cppclass KsuidLite:
-        void assign(const uint8_t* data, size_t data_size) except +
-        void assign(int64_t ts, const uint8_t* payload, size_t payload_size) except +
-        void assign_from_payload(const uint8_t* data, size_t data_size) except +
+        void assign(const uint8_t*, size_t) except +
+        void assign(int64_t, const uint8_t*, size_t) except +
+        void assign_from_payload(const uint8_t*, size_t) except +
 
         int64_t timestamp_millis()
         MemoryView payload()
         MemoryView raw()
 
         bint empty()
-        bint operator<(KsuidLite other)
-        bint operator==(KsuidLite other)
+        bint operator<(KsuidLite)
+        bint operator==(KsuidLite)
 
     cdef cppclass KsuidImpl[T](KsuidLite):
         KsuidImpl()
@@ -37,7 +37,7 @@ ctypedef KsuidImpl[_ks_type_48bit]  _Ksuid48
 
 
 cdef class _KsuidMixin(object):
-    cdef KsuidLite* _uid
+    cdef KsuidLite* uid_
 
 
 cdef class Ksuid(_KsuidMixin):
@@ -52,4 +52,4 @@ cdef class Ksuid48(_KsuidMixin):
     """KSUID with 48 bit timestamp."""
 
 
-cpdef Ksuid parse(s, object ksuid_cls=*)
+# cpdef Ksuid parse(s, object ksuid_cls=*)

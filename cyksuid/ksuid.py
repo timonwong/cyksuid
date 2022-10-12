@@ -1,16 +1,22 @@
 """Compatibility layer."""
 
+from datetime import datetime, timezone
 from typing import Callable, Optional
-from cyksuid._ksuid import Empty, Ksuid
-from cyksuid._ksuid import parse as _new_parse
+
+from cyksuid._ksuid import (BYTE_LENGTH, EMPTY_BYTES, MAX_ENCODED,
+                            STRING_ENCODED_LENGTH, Empty, Ksuid)
 from cyksuid._ksuid import ksuid as _new_ksuid
-from cyksuid._ksuid import BYTE_LENGTH, STRING_ENCODED_LENGTH, EMPTY_BYTES, MAX_ENCODED
+from cyksuid._ksuid import parse as _new_parse
 
 
 class KSUID(Ksuid):
     @property
     def timestamp(self) -> int:
         return super().timestamp_millis // 1000
+
+    @property
+    def datetime(self) -> datetime:
+        return datetime.utcfromtimestamp(self.timestamp)
 
 
 def from_bytes(raw: bytes) -> KSUID:
