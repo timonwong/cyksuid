@@ -26,15 +26,37 @@ compiler.
 
 ## Sample Usage
 
+### v1 API
+
 ```python
-from cyksuid import ksuid
+from cyksuid import ksuid, parse
 
 uid = ksuid.ksuid()
 
-uid.bytes       # b'\x05\xe1\x035\xa8\xbe\xe2\xb5\x0e\x08\xd0\x05\x01L\xe0;\x9a\xed\xc7\xd0'
-uid.hex         # 05e10335a8bee2b50e08d005014ce03b9aedc7d0
-uid.datetime    # datetime.datetime(2017, 6, 28, 6, 48, 21)
-uid.encoded     # b'0q0TPwNTFKyzJKAX1ZRh7rxXiim'
+uid.bytes       # b'\x0f\xd4oB\x81I\xe5\x8d\x95\xb5\xeb\xbc"\xa0\xcd\xfe)N\xe0I'
+uid.hex         # '0fd46f428149e58d95b5ebbc22a0cdfe294ee049'
+uid.datetime    # datetime.datetime(2022, 10, 12, 13, 12, 34)
+uid.timestamp   # 1665580354
+uid.encoded     # b'2G2IfS6177qFICE3w10eMjgYu89'
+
+parse(uid.encoded)
+```
+
+### v2 API
+
+```python
+from cyksuid.v2 import ksuid, parse
+
+uid = ksuid()
+
+uid.bytes       # b'\x0f\xd4oB\x81I\xe5\x8d\x95\xb5\xeb\xbc"\xa0\xcd\xfe)N\xe0I'
+uid.hex         # '0fd46f428149e58d95b5ebbc22a0cdfe294ee049'
+uid.datetime    # datetime.datetime(2022, 10, 12, 13, 12, 34, tzinfo=datetime.timezone.utc)
+uid.timestamp   # 1665580354.0
+uid.encoded     # b'2G2IfS6177qFICE3w10eMjgYu89'
+str(uid)        # '2G2IfS6177qFICE3w10eMjgYu89'
+
+parse(uid.encoded)
 ```
 
 ## Benchmark
