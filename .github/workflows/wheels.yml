@@ -95,7 +95,8 @@ jobs:
       CIBW_TEST_REQUIRES: "pytest"
       CIBW_TEST_COMMAND: "pytest -v {package}/tests"
       CIBW_BUILD: "${{ matrix.cibw.build || '*' }}"
-      CIBW_SKIP: "cp36-* ${{ matrix.cibw.skip || '' }}" # Skip building on CPython 3.6 on all platforms
+      # Skip building on CPython 3.6 on all platforms
+      CIBW_SKIP: "cp36-* *-manylinux_i686 *-musllinux_i686 ${{ matrix.cibw.skip || '' }}"
       CIBW_ARCHS_LINUX: "${{ matrix.cibw.arch || 'auto' }}"
       CIBW_ARCHS_MACOS: "${{ matrix.cibw.arch || 'auto' }}"
 
@@ -123,12 +124,6 @@ jobs:
             name: manylinux-x86_64
             cibw:
               arch: x86_64
-              build: "*manylinux*"
-
-          - os: ubuntu-20.04
-            name: manylinux-i686
-            cibw:
-              arch: i686
               build: "*manylinux*"
 
           - os: ubuntu-20.04
