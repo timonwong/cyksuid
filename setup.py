@@ -147,7 +147,7 @@ setup(
     license="BSD",
     packages=["cyksuid"],
     package_data={
-        "cyksuid": ["*.pyx", "*.pxd", "*.pyi", "py.typed"],
+        "cyksuid": ["*.pyx", "*.pxd", "*.pyi", "py.typed", "*.h", "*.cc", "*.cpp"],
     },
     keywords="ksuid",
     python_requires=">=3.6",

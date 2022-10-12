@@ -1,7 +1,7 @@
 include setup.py README.rst MANIFEST.in LICENSE
 include cyksuid/py.typed
 recursive-include cyksuid *.h *.c *.cc *.cpp
-recursive-include cyksuid *.pyx *.pxd *.pyi
+recursive-include cyksuid *.pyx *.pxd *.pyi *.py
 
 global-exclude *.pyc
 global-exclude *.pyd
