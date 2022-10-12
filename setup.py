@@ -67,7 +67,7 @@ if USE_CYTHON and not HAS_CYTHON:
 if USE_CYTHON:
     suffix = ".pyx"
 else:
-    suffix = ".cc"
+    suffix = ".cpp"
 
 extra_compile_args: List[str] = []
 if sys.platform != "win32":
