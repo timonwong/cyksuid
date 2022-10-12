@@ -165,7 +165,7 @@ def test_golib_interop() -> None:
         for ksuid_json in lines:
             test_data = json.loads(ksuid_json)
             ksuid = Ksuid(
-                datetime.fromtimestamp(test_data["timestamp"]).timestamp(),
+                test_data["timestamp"],
                 bytes.fromhex(test_data["payload"]),
             )
             assert test_data["ksuid"] == str(ksuid)
@@ -181,7 +181,7 @@ def test_golib_interop_ms_mode() -> None:
         for ksuid_json in lines:
             test_data = json.loads(ksuid_json)
             ksuid = Ksuid(
-                datetime.fromtimestamp(test_data["timestamp"]).timestamp(),
+                test_data["timestamp"],
                 bytes.fromhex(test_data["payload"]),
             )
             n = KsuidSvix.PAYLOAD_LENGTH_IN_BYTES
