@@ -20,7 +20,7 @@ jobs:
       matrix:
         include:
           - os: macos-11
-            python: 3.6
+            python: '3.7'
 
           - os: macos-11
             python: "3.10"
@@ -29,7 +29,7 @@ jobs:
             python: pypy-3.8
 
           - os: ubuntu-18.04
-            python: 3.6
+            python: '3.7'
 
           - os: ubuntu-20.04
             python: pypy-3.8
@@ -53,7 +53,7 @@ jobs:
             python: 3.8
 
           - os: windows-2019
-            python: 3.6
+            python: '3.7'
             arch: x86
 
           - os: windows-2019

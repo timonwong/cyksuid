@@ -95,7 +95,7 @@ jobs:
       CIBW_TEST_REQUIRES: "pytest"
       CIBW_TEST_COMMAND: "pytest -v {package}/tests"
       CIBW_BUILD: "${{ matrix.cibw.build || '*' }}"
-      CIBW_SKIP: "${{ matrix.cibw.skip || '' }}"
+      CIBW_SKIP: "cp36-* ${{ matrix.cibw.skip || '' }}" # Skip building on CPython 3.6 on all platforms
       CIBW_ARCHS_LINUX: "${{ matrix.cibw.arch || 'auto' }}"
       CIBW_ARCHS_MACOS: "${{ matrix.cibw.arch || 'auto' }}"
 
