@@ -21,4 +21,4 @@ test: build
 .PHONY: bench
 bench: build
 	pip install svix-ksuid
-	pytest bench.py --benchmark-json bench.json && jq '.benchmarks[] | {name, "mean": .stats["mean"]} ' bench.json
+	pytest bench.py --benchmark-group-by=func --benchmark-json bench.json
