@@ -17,7 +17,9 @@ cdef extern from "ksuidlite.h" nogil:
 
         bint empty()
         bint operator<(KsuidLite)
+        bint operator<=(KsuidLite)
         bint operator==(KsuidLite)
+        bint operator!=(KsuidLite)
 
     cdef cppclass KsuidImpl[T](KsuidLite):
         KsuidImpl()

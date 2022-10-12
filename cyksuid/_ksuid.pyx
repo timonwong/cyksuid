@@ -2,8 +2,6 @@ import os
 import time
 from datetime import datetime, timezone
 
-import cython
-
 from cpython.mem cimport PyMem_Free, PyMem_Malloc
 from cython.operator cimport dereference
 from libc.string cimport memcpy
@@ -19,7 +17,6 @@ EMPTY_BYTES = b'\x00' * BASE62_BYTE_LENGTH
 MAX_ENCODED = b"aWgEPTl1tmebfsQzFP4bxwgy80V"
 
 
-@cython.total_ordering
 cdef class _KsuidMixin(object):
     BASE62_LENGTH = BASE62_ENCODED_LENGTH
 
@@ -113,19 +110,23 @@ cdef class _KsuidMixin(object):
     def __bool__(self):
         return not self.uid_.empty()
 
-    def __lt__(self, other):
-        if not isinstance(other, Ksuid):
+    def __richcmp__(self, object other, int op):
+        if not isinstance(other, _KsuidMixin):
             return NotImplemented
 
-        cdef Ksuid that = <Ksuid>other
-        return dereference(self.uid_) < dereference(that.uid_)
-
-    def __eq__(self, other):
-        if not isinstance(other, Ksuid):
-            return NotImplemented
-
-        cdef Ksuid that = <Ksuid>other
-        return dereference(self.uid_) == dereference(that.uid_)
+        cdef _KsuidMixin that = <_KsuidMixin>other
+        if op == 0:  # <
+            return dereference(self.uid_) < dereference(that.uid_)
+        elif op == 2:  # ==
+            return dereference(self.uid_) == dereference(that.uid_)
+        elif op == 4:  # >
+            return dereference(that.uid_) < dereference(self.uid_)
+        elif op == 1:  # <=
+            return dereference(self.uid_) <= dereference(that.uid_)
+        elif op == 3:  # !=
+            return dereference(self.uid_) != dereference(that.uid_)
+        elif op == 5:  # >=
+            return dereference(that.uid_) <= dereference(self.uid_)
 
     def __setattr__(self, name, value):
         raise TypeError('Ksuid objects are immutable')

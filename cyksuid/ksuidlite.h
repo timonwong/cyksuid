@@ -64,7 +64,9 @@ struct _KL_NOVTABLE KsuidLite {
 
   virtual bool empty() const = 0;
   virtual bool operator<(const KsuidLite& other) const = 0;
+  virtual bool operator<=(const KsuidLite& other) const = 0;
   virtual bool operator==(const KsuidLite& other) const = 0;
+  virtual bool operator!=(const KsuidLite& other) const = 0;
 };
 
 template <size_t TIMESTAMP_SIZE> class KsuidImpl : public KsuidLite {
@@ -162,8 +164,16 @@ public:
     return std::memcmp(_data.data(), other.raw().data, _BYTE_SIZE) < 0;
   }
 
+  bool operator<=(const KsuidLite& other) const override {
+    return std::memcmp(_data.data(), other.raw().data, _BYTE_SIZE) <= 0;
+  }
+
   bool operator==(const KsuidLite& other) const override {
     return std::memcmp(_data.data(), other.raw().data, _BYTE_SIZE) == 0;
+  }
+
+  bool operator!=(const KsuidLite& other) const override {
+    return std::memcmp(_data.data(), other.raw().data, _BYTE_SIZE) != 0;
   }
 
 private:
