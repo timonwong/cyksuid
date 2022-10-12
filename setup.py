@@ -1,12 +1,13 @@
-from distutils import util
 import os
 import os.path
 import re
-import pkg_resources
 import sys
 import sysconfig
+from distutils import util
 from typing import Any, Dict, List, Tuple
-from setuptools import setup, Extension
+
+import pkg_resources
+from setuptools import Extension, setup
 
 IS_DEBUG = os.getenv("CY_DEBUG", "")
 
@@ -138,9 +139,8 @@ setup(
     version="2.0.0.dev",
     description="Cython implementation of ksuid",
     ext_modules=ext_modules,
-    long_description=(
-        open("README.rst").read() if os.path.exists("README.rst") else ""
-    ),
+    long_description=open("README.md").read() if os.path.exists("README.md") else "",
+    long_description_content_type="text/markdown",
     url="https://github.com/timonwong/cyksuid",
     author="Timon Wong",
     author_email="timon86.wang@gmail.com",
