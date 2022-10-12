@@ -120,7 +120,7 @@ public:
     return assign(timestamp_ms, payload, payload_size);
   }
 
-  int64_t timestamp_millis() const override {
+  int64_t timestamp_millis() const noexcept override {
     static_assert(TIMESTAMP_SIZE >= 4 && TIMESTAMP_SIZE <= 6, "invalid timestamp size");
 
     int64_t ts_s = (static_cast<int64_t>(_data[0]) << 24) | (static_cast<int64_t>(_data[1]) << 16) |
@@ -141,38 +141,38 @@ public:
     return (ts_s + KSUID_EPOCH) * 1000 + ts_ms;
   }
 
-  MemoryView payload() const override {
+  MemoryView payload() const noexcept override {
     return MemoryView{
         _data.data() + TIMESTAMP_SIZE,
         _data.size() - TIMESTAMP_SIZE,
     };
   }
 
-  MemoryView raw() const override {
+  MemoryView raw() const noexcept override {
     return MemoryView{
         _data.data(),
         _data.size(),
     };
   }
 
-  bool empty() const override {
+  bool empty() const noexcept override {
     static constexpr uint8_t zero[_BYTE_SIZE] = {0};
     return std::memcmp(_data.data(), zero, _BYTE_SIZE) == 0;
   }
 
-  bool operator<(const KsuidLite& other) const override {
+  bool operator<(const KsuidLite& other) const noexcept override {
     return std::memcmp(_data.data(), other.raw().data, _BYTE_SIZE) < 0;
   }
 
-  bool operator<=(const KsuidLite& other) const override {
+  bool operator<=(const KsuidLite& other) const noexcept override {
     return std::memcmp(_data.data(), other.raw().data, _BYTE_SIZE) <= 0;
   }
 
-  bool operator==(const KsuidLite& other) const override {
+  bool operator==(const KsuidLite& other) const noexcept override {
     return std::memcmp(_data.data(), other.raw().data, _BYTE_SIZE) == 0;
   }
 
-  bool operator!=(const KsuidLite& other) const override {
+  bool operator!=(const KsuidLite& other) const noexcept override {
     return std::memcmp(_data.data(), other.raw().data, _BYTE_SIZE) != 0;
   }
 
