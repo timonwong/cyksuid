@@ -16,7 +16,7 @@ ext_cythonize_kwargs: Dict[str, Any] = {
     "force": True,
     "compiler_directives": {},
 }
-ext_include_dirs = [""]
+ext_include_dirs = []
 
 if IS_DEBUG == "1":
     print("Build in debug mode")
@@ -52,6 +52,11 @@ def check_option(name: str) -> bool:
     if cli_arg in sys.argv:
         sys.argv.remove(cli_arg)
         return True
+
+    env_var = name.replace("-", "_").upper()
+    if os.environ.get(env_var) in ("true", "1"):
+        return True
+
     return False
 
 
