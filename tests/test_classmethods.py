@@ -11,11 +11,12 @@ def test_from_timestamp() -> None:
 
 
 def test_from_payload() -> None:
-    timestamp = time.time()
+    current_time = time.time()
     payload = bytes([i for i in range(Ksuid48.PAYLOAD_LENGTH_IN_BYTES)])
     k = Ksuid48.from_payload(payload)
     assert k.payload == payload
-    assert k.timestamp // 10 == timestamp // 10
+    # just ensure that the timestamp generation works
+    assert abs(k.timestamp - current_time) < 0.5
 
 
 def test_from_timestamp_and_payload() -> None:
