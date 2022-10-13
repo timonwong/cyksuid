@@ -1,5 +1,4 @@
-from cyksuid.fast_base62 import fast_b62decode
-from cyksuid.fast_base62 import fast_b62encode
+from cyksuid.fast_base62 import fast_b62decode, fast_b62encode
 
 
 def test_convert_and_back() -> None:
