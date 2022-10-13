@@ -141,7 +141,7 @@ if USE_CYTHON:
 
 setup(
     name="cyksuid",
-    version="2.0.0.dev",
+    version="2.0.0",
     description="Cython implementation of ksuid",
     ext_modules=ext_modules,
     long_description=open("README.md").read() if os.path.exists("README.md") else "",
