@@ -181,5 +181,5 @@ private:
 };
 
 typedef KsuidImpl<4> Ksuid;
-typedef KsuidImpl<5> KsuidSvix;
+typedef KsuidImpl<5> Ksuid40;
 typedef KsuidImpl<6> Ksuid48;

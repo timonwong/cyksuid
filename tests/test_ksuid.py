@@ -5,7 +5,7 @@ from typing import Set
 
 import pytest
 
-from cyksuid.v2 import Ksuid, KsuidSvix, from_bytes, ksuid, parse
+from cyksuid.v2 import Ksuid, KsuidMs, from_bytes, ksuid, parse
 
 TESTS_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -151,7 +151,7 @@ def test_ms_mode_datetime() -> None:
         return (s * 1000 + ms) / 1000
 
     for i in range(TEST_ITEMS_COUNT):
-        k = ksuid(time_func=lambda: time.timestamp(), ksuid_cls=KsuidSvix)
+        k = ksuid(time_func=lambda: time.timestamp(), ksuid_cls=KsuidMs)
         # Test the values are correct rounded to 4 ms accuracy
         assert fix_timestamp_precision(time.timestamp()) == k.timestamp
         time += timedelta(milliseconds=5)
@@ -184,14 +184,14 @@ def test_golib_interop_ms_mode() -> None:
                 test_data["timestamp"],
                 bytes.fromhex(test_data["payload"]),
             )
-            n = KsuidSvix.PAYLOAD_LENGTH_IN_BYTES
-            ksuid_ms = KsuidSvix(ksuid.datetime.timestamp(), ksuid.payload[:n])
+            n = KsuidMs.PAYLOAD_LENGTH_IN_BYTES
+            ksuid_ms = KsuidMs(ksuid.datetime.timestamp(), ksuid.payload[:n])
             assert ksuid_ms.datetime == ksuid.datetime
-            ksuid_ms_from = KsuidSvix(ksuid_ms.datetime.timestamp(), ksuid_ms.payload)
+            ksuid_ms_from = KsuidMs(ksuid_ms.datetime.timestamp(), ksuid_ms.payload)
             assert ksuid_ms.payload == ksuid_ms_from.payload
             assert ksuid_ms.timestamp == ksuid_ms_from.timestamp
 
-            ksuid_ms = parse(test_data["ksuid"], ksuid_cls=KsuidSvix)
+            ksuid_ms = parse(test_data["ksuid"], ksuid_cls=KsuidMs)
             timediff = ksuid_ms.datetime - ksuid.datetime
             assert abs(timediff.total_seconds() * (10**3)) <= 1000
             assert test_data["ksuid"] == str(ksuid_ms)

@@ -150,12 +150,12 @@ cdef class Ksuid(_KsuidMixin):
         del self.uid_
 
 
-cdef class KsuidSvix(_KsuidMixin):
+cdef class Ksuid40(_KsuidMixin):
     PAYLOAD_LENGTH_IN_BYTES = 15
     TIMESTAMP_LENGTH_IN_BYTES = 5
 
     def __cinit__(self):
-        self.uid_ = new _KsuidSvix()
+        self.uid_ = new _Ksuid40()
 
     def __dealloc__(self):
         del self.uid_

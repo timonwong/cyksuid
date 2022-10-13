@@ -24,7 +24,7 @@ cdef extern from "ksuidlite.h" nogil:
     cdef cppclass _Ksuid "Ksuid"(KsuidLite):
         pass
 
-    cdef cppclass _KsuidSvix "KsuidSvix"(KsuidLite):
+    cdef cppclass _Ksuid40 "Ksuid40"(KsuidLite):
         pass
 
     cdef cppclass _Ksuid48 "Ksuid48"(KsuidLite):
@@ -39,8 +39,8 @@ cdef class Ksuid(_KsuidMixin):
     """KSUIDs are 20 bytes contains 4 byte timestamp with custom epoch and 16 bytes randomness."""
 
 
-cdef class KsuidSvix(_KsuidMixin):
-    """KSUID compatible with Svix's KSUID implementation."""
+cdef class Ksuid40(_KsuidMixin):
+    """KSUID compatible with 40 bit timestamp, at 4ms precision."""
 
 
 cdef class Ksuid48(_KsuidMixin):

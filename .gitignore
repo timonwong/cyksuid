@@ -8,6 +8,10 @@ dist/
 wheelhouse/
 __pycache__/
 
+.mypy_cache/
+.pytest_cache/
+cython_debug/
+
 .envrc
 *.egg-info
 *.so
@@ -16,4 +20,3 @@ bench.json
 
 .coverage
 coverage.xml
-cython_debug

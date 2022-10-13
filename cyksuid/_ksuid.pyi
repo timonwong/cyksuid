@@ -57,8 +57,8 @@ class Ksuid:
     @property
     def encoded(self) -> _bytestr: ...
 
-class KsuidSvix(Ksuid):
-    """KSUID compatible with Svix's KSUID implementation."""
+class Ksuid40(Ksuid):
+    """KSUID compatible with 40 bit timestamp, at 4ms precision."""
 
 class Ksuid48(Ksuid):
     """KSUID with 48 bit timestamp."""
