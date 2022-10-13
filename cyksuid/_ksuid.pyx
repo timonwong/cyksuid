@@ -1,8 +1,6 @@
 import os
-import time
 from datetime import datetime, timezone
 
-from cpython.mem cimport PyMem_Free, PyMem_Malloc
 from cython.operator cimport dereference
 from libc.string cimport memcpy
 
@@ -16,6 +14,7 @@ EMPTY_BYTES = b'\x00' * BASE62_BYTE_LENGTH
 # A bytes-encoded maximum value for a KSUID
 MAX_ENCODED = b"aWgEPTl1tmebfsQzFP4bxwgy80V"
 
+cdef _urandom = os.urandom
 
 cdef class _KsuidMixin(object):
     BASE62_LENGTH = BASE62_ENCODED_LENGTH
@@ -25,21 +24,26 @@ cdef class _KsuidMixin(object):
         cdef double ts
         cdef int64_t ts_ms
 
-        if len(args) == 0 and len(kwargs) == 0:
+        if len(args) == 0:
+            if len(kwargs) == 0:
+                # No param given, generate a random payload
+                data = _urandom(self.PAYLOAD_LENGTH_IN_BYTES)
+            else:
+                data = kwargs["payload"]
+
+            self.uid_.assign_from_payload(data, len(data))
             return
         elif len(args) == 1:
+            # only 1 param, assign it from raw
             data = args[0]
             self.uid_.assign(data, len(data))
             return
         elif len(args) == 2:
+            # 2 params, assign it from timestamp and payload
             ts = args[0]
             ts_ms = <int64_t>(ts * 1000)
             data = args[1]
             self.uid_.assign(ts_ms, data, len(data))
-            return
-        elif len(args) == 0:
-            data = kwargs['payload']
-            self.uid_.assign_from_payload(data, len(data))
             return
 
         raise ValueError("invalid number of arguments")
@@ -50,7 +54,7 @@ cdef class _KsuidMixin(object):
 
     @classmethod
     def from_timestamp_and_payload(cls, timestamp, payload):
-        return cls(timestamp=timestamp, payload=payload)
+        return cls(timestamp, payload)
 
     @classmethod
     def from_bytes(cls, raw):
@@ -176,11 +180,13 @@ def ksuid(time_func=None, rand_func=None, ksuid_cls=Ksuid):
     :param callable ksuid_cls: KSUID class, defaults to Ksuid.
     """
 
+    if time_func is None and rand_func is None:
+        return ksuid_cls()
+
     if rand_func is None:
-        rand_func = os.urandom
+        rand_func = _urandom
 
     cdef bytes payload = rand_func(ksuid_cls.PAYLOAD_LENGTH_IN_BYTES)
-
     if time_func is None:
         return ksuid_cls(payload=payload)
 
@@ -209,4 +215,4 @@ def parse(object s, object ksuid_cls=None):
 
 
 # Represents a completely empty (invalid) KSUID
-Empty = Ksuid()
+Empty = Ksuid(EMPTY_BYTES)

@@ -1,15 +1,23 @@
 """Compatibility layer."""
 
-from datetime import datetime, timezone
-from typing import Callable, Optional
+from datetime import datetime
+from typing import Callable, Optional, Union
 
-from cyksuid._ksuid import (BYTE_LENGTH, EMPTY_BYTES, MAX_ENCODED,
-                            STRING_ENCODED_LENGTH, Empty, Ksuid)
+from cyksuid._ksuid import (
+    BYTE_LENGTH,
+    EMPTY_BYTES,
+    MAX_ENCODED,
+    STRING_ENCODED_LENGTH,
+    Empty,
+    Ksuid,
+)
 from cyksuid._ksuid import ksuid as _new_ksuid
 from cyksuid._ksuid import parse as _new_parse
 
 
 class KSUID(Ksuid):
+    """KSUIDs are 20 bytes contains 4 byte timestamp with custom epoch and 16 bytes random data."""
+
     @property
     def timestamp(self) -> int:
         return super().timestamp_millis // 1000
@@ -20,10 +28,12 @@ class KSUID(Ksuid):
 
 
 def from_bytes(raw: bytes) -> KSUID:
+    """Construct KSUID from raw bytes."""
     return KSUID(raw)
 
 
-def parse(s: bytes) -> KSUID:
+def parse(s: Union[str, bytes]) -> KSUID:
+    """Parse KSUID from base62 encoded form."""
     return _new_parse(s, ksuid_cls=KSUID)
 
 
