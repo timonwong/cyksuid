@@ -52,11 +52,6 @@ def check_option(name: str) -> bool:
     if cli_arg in sys.argv:
         sys.argv.remove(cli_arg)
         return True
-
-    env_var = name.replace("-", "_").upper()
-    if os.environ.get(env_var) in ("true", "1"):
-        return True
-
     return False
 
 

@@ -49,6 +49,11 @@ cdef class _KsuidMixin(object):
         raise ValueError("invalid number of arguments")
 
     @classmethod
+    def from_timestamp(cls, timestamp):
+        cdef bytes payload = _urandom(cls.PAYLOAD_LENGTH_IN_BYTES)
+        return cls(timestamp, payload)
+
+    @classmethod
     def from_payload(cls, payload):
         return cls(payload=payload)
 

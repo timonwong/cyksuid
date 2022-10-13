@@ -8,8 +8,6 @@ dist/
 wheelhouse/
 __pycache__/
 
-.mypy_cache/
-.pytest_cache/
 cython_debug/
 
 .envrc
