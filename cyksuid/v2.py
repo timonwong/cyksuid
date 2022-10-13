@@ -1,8 +1,9 @@
+from cyksuid import hints
 from cyksuid._ksuid import Empty, Ksuid, Ksuid40, Ksuid48, ksuid, parse
 
 
-def from_bytes(raw: bytes) -> Ksuid:
-    """Creates KSUID from raw bytes."""
+def from_bytes(raw: hints.Bytes) -> Ksuid:
+    """Create a new KSUID from raw bytes."""
     return Ksuid(raw)
 
 

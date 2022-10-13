@@ -1,8 +1,9 @@
 """Compatibility layer."""
 
 from datetime import datetime
-from typing import Callable, Optional, Union
+from typing import Optional, Union
 
+from cyksuid import hints
 from cyksuid._ksuid import (
     BYTE_LENGTH,
     EMPTY_BYTES,
@@ -20,29 +21,28 @@ class KSUID(Ksuid):
 
     @property
     def timestamp(self) -> int:
+        """Timestamp in seconds."""
         return super().timestamp_millis // 1000
 
     @property
     def datetime(self) -> datetime:
+        """Datetime for timestamp (timezone naive)."""
         return datetime.utcfromtimestamp(self.timestamp)
 
 
-def from_bytes(raw: bytes) -> KSUID:
+def from_bytes(raw: hints.Bytes) -> KSUID:
     """Construct KSUID from raw bytes."""
     return KSUID(raw)
 
 
-def parse(s: Union[str, bytes]) -> KSUID:
+def parse(s: hints.StrOrBytes) -> KSUID:
     """Parse KSUID from base62 encoded form."""
     return _new_parse(s, ksuid_cls=KSUID)
 
 
-TimeFunc = Callable[[], float]
-RandFunc = Callable[[int], bytes]
-
-
 def ksuid(
-    time_func: Optional[TimeFunc] = None, rand_func: Optional[RandFunc] = None
+    time_func: Optional[hints.TimeFunc] = None,
+    rand_func: Optional[hints.RandFunc] = None,
 ) -> KSUID:
     """Factory to construct KSUID objects.
 

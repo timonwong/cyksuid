@@ -2,12 +2,12 @@ import functools
 from datetime import datetime
 from typing import Any, Callable, Optional, Type, TypeVar, overload
 
-_bytestr = bytes
+from cyksuid import hints
 
 BYTE_LENGTH: int
 STRING_ENCODED_LENGTH: int
-EMPTY_BYTES: bytes
-MAX_ENCODED: bytes
+EMPTY_BYTES: hints.Bytes
+MAX_ENCODED: hints.Bytes
 
 SelfT = TypeVar("SelfT", bound="Ksuid")
 
@@ -23,41 +23,49 @@ class Ksuid:
     def __init__(self) -> None:
         """Create a new KSUID with current timestamp and generated random payload."""
     @overload
-    def __init__(self, raw: bytes) -> None:
-        """Creates KSUID from raw bytes."""
+    def __init__(self, raw: hints.Bytes) -> None:
+        """Create a new KSUID from raw bytes."""
     @overload
-    def __init__(self, timestamp: int | float, payload: bytes) -> None:
-        """Creates KSUID from specified timestamp in milliseconds and payload."""
+    def __init__(self, timestamp: hints.IntOrFloat, payload: hints.Bytes) -> None:
+        """Create a new KSUID from specified timestamp in milliseconds and payload."""
     @overload
     def __init__(self, **kwargs: Any) -> None: ...
     @classmethod
-    def from_timestamp(cls: Type[SelfT], timestamp: int | float) -> SelfT: ...
+    def from_timestamp(cls: Type[SelfT], timestamp: hints.IntOrFloat) -> SelfT:
+        """Create a new KSUID with specified timestamp and generated random payload."""
     @classmethod
-    def from_payload(cls: Type[SelfT], payload: bytes) -> SelfT: ...
+    def from_payload(cls: Type[SelfT], payload: hints.Bytes) -> SelfT:
+        """Create a new KSUID with current timestamp and specified payload."""
     @classmethod
     def from_timestamp_and_payload(
-        cls: Type[SelfT], timestamp: int | float, payload: bytes
-    ) -> SelfT: ...
+        cls: Type[SelfT], timestamp: hints.IntOrFloat, payload: hints.Bytes
+    ) -> SelfT:
+        """Create a new KSUID from specified timestamp in milliseconds and payload."""
     @classmethod
-    def from_bytes(cls: Type[SelfT], raw: bytes) -> SelfT: ...
+    def from_bytes(cls: Type[SelfT], raw: hints.Bytes) -> SelfT:
+        """Create a new KSUID from raw bytes."""
     def __bool__(self) -> bool: ...
     def __lt__(self, other: object) -> bool: ...
     def __eq__(self, other: object) -> bool: ...
-    def __bytes__(self) -> bytes: ...
+    def __bytes__(self) -> hints.Bytes: ...
     @property
-    def datetime(self) -> datetime: ...
+    def datetime(self) -> datetime:
+        """Datetime for timestamp (timezone aware)."""
     @property
-    def timestamp_millis(self) -> int: ...
+    def timestamp_millis(self) -> int:
+        """Timestamp in milliseconds."""
     @property
-    def timestamp(self) -> float: ...
+    def timestamp(self) -> float:
+        """Timestamp in seconds."""
     @property
-    def payload(self) -> _bytestr: ...
+    def payload(self) -> hints.Bytes: ...
     @property
-    def bytes(self) -> _bytestr: ...
+    def bytes(self) -> hints.Bytes: ...
     @property
     def hex(self) -> str: ...
     @property
-    def encoded(self) -> _bytestr: ...
+    def encoded(self) -> hints.Bytes:
+        """Base62 encoded form of KSUID."""
 
 class Ksuid40(Ksuid):
     """KSUID compatible with 40 bit timestamp, at 4ms precision."""
@@ -65,12 +73,9 @@ class Ksuid40(Ksuid):
 class Ksuid48(Ksuid):
     """KSUID with 48 bit timestamp."""
 
-TimeFunc = Callable[[], float]
-RandFunc = Callable[[int], bytes]
-
 def ksuid(
-    time_func: Optional[TimeFunc] = None,
-    rand_func: Optional[RandFunc] = None,
+    time_func: Optional[hints.TimeFunc] = None,
+    rand_func: Optional[hints.RandFunc] = None,
     ksuid_cls: Optional[Type[SelfT]] = None,
 ) -> SelfT:
     """Factory to construct KSUID objects.
@@ -80,7 +85,7 @@ def ksuid(
     :param ksuid_cls: class to use for KSUID, defaults to Ksuid
     """
 
-def parse(s: bytes | str, ksuid_cls: Optional[Type[SelfT]] = None) -> SelfT:
+def parse(s: hints.StrOrBytes, ksuid_cls: Optional[Type[SelfT]] = None) -> SelfT:
     """Parse KSUID from base62 encoded form."""
 
 # Represents a completely empty (invalid) KSUID
