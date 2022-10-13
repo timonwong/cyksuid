@@ -1,10 +1,10 @@
 .PHONY: build
 build:
-	unset CY_DEBUG; python setup.py build_ext --inplace --with-cython
+	unset CYKSUID_DEBUG; python setup.py build_ext --inplace --with-cython
 
 .PHONY: build-debug
 build-debug:
-	export CY_DEBUG=1; python setup.py build_ext --inplace --with-cython
+	export CYKSUID_DEBUG=1; python setup.py build_ext --inplace --with-cython
 
 .PHONY: coverage
 coverage: build-debug

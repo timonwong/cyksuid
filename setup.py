@@ -9,14 +9,14 @@ from typing import Any, Dict, List, Tuple
 import pkg_resources
 from setuptools import Extension, setup
 
-IS_DEBUG = os.getenv("CY_DEBUG", "")
+IS_DEBUG = os.getenv("CYKSUID_DEBUG", "")
 
 ext_macros: List[Tuple[str, str]] = []
 ext_cythonize_kwargs: Dict[str, Any] = {
     "force": True,
     "compiler_directives": {},
 }
-ext_include_dirs = ["ksuidlib/include"]
+ext_include_dirs = [""]
 
 if IS_DEBUG == "1":
     print("Build in debug mode")
@@ -47,18 +47,23 @@ except ImportError:
     HAS_CYTHON = False
 
 
-USE_CYTHON = "--cython" in sys.argv or "--with-cython" in sys.argv
+def check_option(name: str) -> bool:
+    cli_arg = "--" + name
+    if cli_arg in sys.argv:
+        sys.argv.remove(cli_arg)
+        return True
 
-if "--no-cython" in sys.argv:
+    env_var = name.replace("-", "_").upper()
+    if os.environ.get(env_var) in ("true", "1"):
+        return True
+
+    return False
+
+
+USE_CYTHON = check_option("cython") or check_option("with-cython")
+
+if check_option("no-cython") or check_option("without-cython"):
     USE_CYTHON = False
-    sys.argv.remove("--no-cython")
-if "--without-cython" in sys.argv:
-    USE_CYTHON = False
-    sys.argv.remove("--without-cython")
-if "--cython" in sys.argv:
-    sys.argv.remove("--cython")
-if "--with-cython" in sys.argv:
-    sys.argv.remove("--with-cython")
 
 if USE_CYTHON and not HAS_CYTHON:
     print("WARNING: Cython not installed.  Building without Cython.")
