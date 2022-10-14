@@ -16,6 +16,17 @@ def test_construct_from_timestamp() -> None:
     assert x.datetime == datetime.datetime.utcfromtimestamp(int(cur_time))
 
 
+def test_construct_from_payload() -> None:
+    payload = bytes([i for i in range(ksuid.KSUID.PAYLOAD_LENGTH_IN_BYTES)])
+
+    def rand_func(n: int) -> bytes:
+        assert n == len(payload)
+        return payload
+
+    x = ksuid.ksuid(rand_func=rand_func)
+    assert x.payload == payload
+
+
 def test_empty() -> None:
     assert not bool(ksuid.Empty)
     x = ksuid.from_bytes(b"\x00" * ksuid.BYTE_LENGTH)

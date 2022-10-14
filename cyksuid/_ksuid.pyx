@@ -46,7 +46,7 @@ cdef class _KsuidMixin(object):
             self.uid_.assign(ts_ms, data, len(data))
             return
 
-        raise ValueError("invalid number of arguments")
+        raise ValueError("invalid number of arguments")  # pragma: no cover
 
     @classmethod
     def from_timestamp(cls, timestamp):
