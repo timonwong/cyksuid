@@ -3,7 +3,7 @@
 github_url = "https://github.com/timonwong/cyksuid"
 
 [tool.tbump.version]
-current = "2.0.0"
+current = "2.0.1"
 regex = '''
   (?P<major>\d+)
   \.
