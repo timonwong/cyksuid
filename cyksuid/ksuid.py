@@ -1,7 +1,7 @@
 """Compatibility layer."""
 
 from datetime import datetime
-from typing import Optional, Union
+from typing import Optional
 
 from cyksuid import hints
 from cyksuid._ksuid import (
@@ -53,11 +53,11 @@ def ksuid(
 
 
 __all__ = [
-    "Empty",
-    "Ksuid",
-    "parse",
     "BYTE_LENGTH",
     "STRING_ENCODED_LENGTH",
     "EMPTY_BYTES",
     "MAX_ENCODED",
+    "Empty",
+    "Ksuid",
+    "parse",
 ]

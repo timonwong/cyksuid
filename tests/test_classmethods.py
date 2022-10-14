@@ -1,7 +1,13 @@
 import os
 import time
 
-from cyksuid.v2 import Ksuid48
+from cyksuid.v2 import BYTE_LENGTH, Ksuid48
+
+
+def test_from_bytes() -> None:
+    raw = bytes([i for i in range(BYTE_LENGTH)])
+    k = Ksuid48.from_bytes(raw)
+    assert bytes(k) == raw
 
 
 def test_from_timestamp() -> None:
