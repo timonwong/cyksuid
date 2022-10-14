@@ -1,6 +1,6 @@
 [tool.tbump]
 # Uncomment this if your project is hosted on GitHub:
-github_url = "https://github.com/zeromq/pyzmq"
+github_url = "https://github.com/timonwong/cyksuid"
 
 [tool.tbump.version]
 current = "2.0.0"
