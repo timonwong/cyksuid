@@ -68,8 +68,7 @@ cdef class _KsuidMixin(object):
     @property
     def datetime(self):
         """Timestamp portion of the ID as a datetime.datetime object."""
-        cdef double ts = self.timestamp
-        return datetime.fromtimestamp(ts, tz=timezone.utc)
+        return datetime.fromtimestamp(self.timestamp, tz=timezone.utc)
 
     @property
     def timestamp_millis(self):
