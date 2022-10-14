@@ -126,10 +126,22 @@ jobs:
               arch: x86_64
               build: "*manylinux*"
 
+          # - os: ubuntu-20.04
+          #   name: manylinux-aarch64
+          #   cibw:
+          #     arch: aarch64
+          #     build: "*manylinux*"
+
           - os: ubuntu-20.04
             name: musllinux
             cibw:
               build: "*musllinux*"
+
+          # - os: ubuntu-20.04
+          #   name: musllinux-arrch64
+          #   cibw:
+          #     arch: aarch64
+          #     build: "*musllinux*"
 
           - os: windows-2019
             name: win32
@@ -151,6 +163,13 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+
+      # - name: Set up qemu
+      #   id: qemu
+      #   if: contains(matrix.os, 'ubuntu-') && matrix.cibw.arch == 'aarch64'
+      #   uses: docker/setup-qemu-action@v1
+      #   with:
+      #     platforms: arm64
 
       - name: setup python
         uses: actions/setup-python@v4
