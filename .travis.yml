@@ -1,17 +1,41 @@
+os: linux
 dist: focal
 language: python
-python:
-  - "3.7"
-  - "3.8"
-  - "3.9"
-  - "3.10"
+
+jobs:
+  include:
+    - name: python 3.7 (amd64)
+      python: "3.7"
+      arch: amd64
+    - name: python 3.8 (amd64)
+      python: "3.8"
+      arch: amd64
+    - name: python 3.9 (amd64)
+      python: "3.9"
+      arch: amd64
+    - name: python 3.10 (amd64)
+      python: "3.10"
+      arch: amd64
+
+    - name: python 3.7 (arm64)
+      python: "3.7"
+      arch: arm64
+    - name: python 3.8 (arm64)
+      python: "3.8"
+      arch: arm64
+    - name: python 3.9 (arm64)
+      python: "3.9"
+      arch: arm64
+    - name: python 3.10 (arm64)
+      python: "3.10"
+      arch: arm64
 
 before_install:
   - pip install -U pip build
   - pip install -r test-requirements.txt
 
 install:
-  - 'python setup.py build_ext --inplace --with-cython'
+  - "python setup.py build_ext --inplace --with-cython"
 
 # commands to run tests
 script:
