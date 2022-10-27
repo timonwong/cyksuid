@@ -207,7 +207,7 @@ def parse(object s, object ksuid_cls=None):
     elif isinstance(s, bytes):
         buf = <bytes>s
     else:
-        raise TypeError("Expected str or bytes, got %r" % type(s))
+        raise TypeError("Expect str or bytes, got %r" % type(s))
 
     buf_size = len(buf)
     if buf_size != BASE62_ENCODED_LENGTH:
