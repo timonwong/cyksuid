@@ -10,11 +10,11 @@ cdef bytes _fast_b62encode(const uint8_t* src, size_t src_len):
     # Checking error codes
     if err_code != 0:
         if err_code == ERR_B62_INSUFFICIENT_OUTPUT_BUFFER:
-            raise ValueError("Insufficient output buffer size")
+            raise ValueError("Insufficient output buffer size")  # pragma: no cover
         elif err_code == ERR_B62_INSUFFICIENT_INPUT_BUFFER:
-            raise ValueError("Insufficient input buffer size")
+            raise ValueError("Insufficient input buffer size")  # pragma: no cover
         elif err_code == ERR_B62_INVALID_INPUT:
-            raise ValueError("Invalid input buffer")
+            raise ValueError("Invalid input buffer")  # pragma: no cover
         else:
             raise ValueError("Unknown error: %d" % err_code)  # pragma: no cover
 
@@ -30,11 +30,11 @@ cdef bytes _fast_b62decode(const char* src, size_t src_len):
     # Checking error codes
     if err_code != 0:
         if err_code == ERR_B62_INSUFFICIENT_OUTPUT_BUFFER:
-            raise ValueError("Insufficient output buffer size")
+            raise ValueError("Insufficient output buffer size")  # pragma: no cover
         elif err_code == ERR_B62_INSUFFICIENT_INPUT_BUFFER:
-            raise ValueError("Insufficient input buffer size")
+            raise ValueError("Insufficient input buffer size")  # pragma: no cover
         elif err_code == ERR_B62_INVALID_INPUT:
-            raise ValueError("Invalid input buffer")
+            raise ValueError("Invalid input buffer")  # pragma: no cover
         else:
             raise ValueError("Unknown error: %d" % err_code)  # pragma: no cover
 
