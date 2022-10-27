@@ -266,9 +266,25 @@ class BuildExt(build_ext.build_ext):
         return is_supported
 
 
+version = "2.0.2"
+parsed_version = pkg_resources.parse_version(version)
+release_status = "Development Status :: 5 - Production/Stable"
+try:
+    if parsed_version.is_prerelease:
+        if "a" in version:
+            release_status = "Development Status :: 3 - Alpha"
+        else:
+            release_status = "Development Status :: 4 - Beta"
+except Exception:
+    if "a" in version:
+        release_status = "Development Status :: 3 - Alpha"
+    elif "b" in version:
+        release_status = "Development Status :: 4 - Beta"
+
+
 setup(
     name="cyksuid",
-    version="2.0.2",
+    version=version,
     description="Cython implementation of ksuid",
     ext_modules=ext_modules,
     cmdclass={"build_ext": BuildExt},
@@ -285,7 +301,7 @@ setup(
     keywords=["ksuid"],
     python_requires=">=3.7",
     classifiers=[
-        "Development Status :: 5 - Production/Stable",
+        release_status,
         "Intended Audience :: Developers",
         "License :: OSI Approved :: BSD License",
         "Operating System :: OS Independent",
@@ -297,6 +313,7 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
         "Topic :: Scientific/Engineering",
         "Topic :: Software Development",
         "Topic :: Software Development :: Libraries",

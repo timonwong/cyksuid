@@ -23,7 +23,7 @@ tag_template = "v{new_version}"
 
 [[tool.tbump.file]]
 src = "setup.py"
-search = 'version="{current_version}"'
+search = '^version="{current_version}"$'
 
 [[tool.tbump.file]]
 src = "cyksuid/__version__.py"
