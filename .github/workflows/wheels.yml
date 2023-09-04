@@ -54,7 +54,7 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: setup python
         uses: actions/setup-python@v4
@@ -161,7 +161,7 @@ jobs:
               build: "cp*win_amd64"
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       # - name: Set up qemu
       #   id: qemu
