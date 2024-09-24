@@ -4,8 +4,20 @@ on:
   push:
     branches:
       - master
-  pull_request: {}
+  pull_request:
+    branches:
+      - master
   workflow_dispatch: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+env:
+  FORCE_COLOR: "1"
+  # only affects Windows, but easiest to set here for now
+  SETUPTOOLS_ENABLE_FEATURES: "legacy-editable"
 
 jobs:
   test:
@@ -13,66 +25,77 @@ jobs:
     timeout-minutes: 20
 
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         include:
-          - os: macos-11
+          - os: macos-13
             python: "3.7"
 
-          - os: macos-11
+          - os: macos-14
+            python: "3.12"
+
+          - os: macos-14
+            python: "3.13"
+
+          #- os: macos-13
+          #  python: pypy-3.9
+
+          - os: ubuntu-20.04
+            python: "3.7"
+
+          #- os: ubuntu-22.04
+          #  python: pypy-3.9
+
+          #- os: ubuntu-22.04
+          #  python: pypy-3.7
+
+          - os: ubuntu-22.04
+            python: "3.9"
+
+          - os: ubuntu-22.04
             python: "3.10"
 
-          - os: macos-11
-            python: pypy-3.8
-
-          - os: ubuntu-18.04
-            python: "3.7"
-
-          - os: ubuntu-20.04
-            python: pypy-3.8
-
-          - os: ubuntu-20.04
-            python: pypy-3.7
-
-          # - os: ubuntu-20.04
-          #   python: "3.7"
-
-          # - os: ubuntu-20.04
-          #   python: "3.8"
-
-          # - os: ubuntu-20.04
-          #   python: "3.9"
-
-          # - os: ubuntu-20.04
-          #   python: "3.10"
-
-          - os: ubuntu-20.04
+          - os: ubuntu-22.04
             python: "3.11"
 
-          - os: windows-2019
+          - os: ubuntu-22.04
+            python: "3.8"
+
+          - os: ubuntu-22.04
+            python: "3.12"
+
+          - os: ubuntu-22.04
+            python: "3.13"
+
+          - os: ubuntu-22.04
+            python: "3.13"
+
+          - os: windows-2022
             python: "3.7"
             arch: x86
 
-          - os: windows-2019
+          - os: windows-2022
             python: "3.9"
             arch: x64
 
-          - os: windows-2019
-            python: "3.10"
+          - os: windows-2022
+            python: "3.13"
             arch: x64
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: setup python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
           architecture: ${{ matrix.arch || 'x64' }}
+          allow-prereleases: true
+          cache: pip
 
       - name: install dependencies
         run: |
-          pip install --upgrade pip wheel
+          pip install --upgrade pip wheel setuptools
           pip install -r test-requirements.txt
 
       - name: show environment

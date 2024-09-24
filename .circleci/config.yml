@@ -44,12 +44,13 @@ jobs:
         default: ""
 
     machine:
-      image: ubuntu-2004:2022.04.1
+      image: ubuntu-2204:2023.07.1
     resource_class: arm.medium
 
     environment:
-      CIBW_SKIP: "<< parameters.skip >>"
+      CIBW_SKIP: "<< parameters.skip >> pp*" # skip building pypy wheels since broken (pypa/cibuildwheel#2015)
       CIBW_BUILD: "<< parameters.build >>"
+      CIBW_PRERELEASE_PYTHONS: "1"
 
     steps:
       - checkout
