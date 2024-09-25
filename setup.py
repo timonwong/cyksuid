@@ -245,7 +245,7 @@ class BuildExt(build_ext.build_ext):
 
 setup(
     name="cyksuid",
-    version="2.0.2",
+    version="2.1.0",
     description="Cython implementation of ksuid",
     ext_modules=ext_modules,
     cmdclass={"build_ext": BuildExt},

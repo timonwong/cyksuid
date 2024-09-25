@@ -3,7 +3,7 @@
 github_url = "https://github.com/timonwong/cyksuid"
 
 [tool.tbump.version]
-current = "2.0.2"
+current = "2.1.0"
 regex = '''
   (?P<major>\d+)
   \.
@@ -59,7 +59,7 @@ environment = { MACOSX_DEPLOYMENT_TARGET = "10.15" }
 
 # manylinux2010 for (less) old cp37-9, pp37-8
 [[tool.cibuildwheel.overrides]]
-select = "cp3{8,9}-* pp3{7,8}-*"
+select = "cp3{7,8,9}-* pp3{7,8}-*"
 manylinux-x86_64-image = "manylinux2010"
 manylinux-i686-image = "manylinux2010"
 
