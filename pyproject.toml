@@ -3,7 +3,7 @@
 github_url = "https://github.com/timonwong/cyksuid"
 
 [tool.tbump.version]
-current = "2.0.2"
+current = "2.1.0"
 regex = '''
   (?P<major>\d+)
   \.
@@ -37,42 +37,31 @@ build-backend = "setuptools.build_meta"
 build-verbosity = "1"
 
 [tool.cibuildwheel.linux]
-environment.CFLAGS = "-Wl,-strip-all"
-environment.CXXFLAGS = "-Wl,-strip-all"
-
+manylinux-x86_64-image = "manylinux2014"
+manylinux-i686-image = "manylinux2014"
 manylinux-aarch64-image = "manylinux2014"
 musllinux-aarch64-image = "musllinux_1_1"
 musllinux-i686-image = "musllinux_1_1"
 musllinux-x86_64-image = "musllinux_1_1"
 
+[tool.cibuildwheel.linux.environment]
+CFLAGS = "-Wl,-strip-all"
+CXXFLAGS = "-Wl,-strip-all"
 
-[tool.cibuildwheel.macos]
-environment.MACOSX_DEPLOYMENT_TARGET = "10.9"
+[tool.cibuildwheel.macos.environment]
+# note: everything here needs to also be duplicated in overrides below
+MACOSX_DEPLOYMENT_TARGET = "10.9"
 
 # mac-arm target is 10.15
 [[tool.cibuildwheel.overrides]]
 select = "*macos*{universal2,arm64}*"
-environment.MACOSX_DEPLOYMENT_TARGET = "10.15"
+environment = { MACOSX_DEPLOYMENT_TARGET = "10.15" }
 
-# manylinux1 for old Python
+# manylinux2010 for (less) old cp37-9, pp37-8
 [[tool.cibuildwheel.overrides]]
-select = "cp3{67}-*"
-manylinux-x86_64-image = "manylinux1"
-manylinux-i686-image = "manylinux1"
-
-# manylinux2010 for cp38-9, pp37-8
-[[tool.cibuildwheel.overrides]]
-select = "cp3{8,9}-* pp3{7,8}-*"
+select = "cp3{7,8,9}-* pp3{7,8}-*"
 manylinux-x86_64-image = "manylinux2010"
 manylinux-i686-image = "manylinux2010"
 
-# manylinux2014 for cp310, pp39
-[[tool.cibuildwheel.overrides]]
-select = "cp310-* pp39-*"
-manylinux-x86_64-image = "manylinux2014"
-manylinux-i686-image = "manylinux2014"
-
-# manylinux_2_28 for cp311
-[[tool.cibuildwheel.overrides]]
-select = "cp311-*"
-manylinux-x86_64-image = "manylinux_2_28"
+# note: manylinux_2_28 builds are added
+# in .github/workflows/wheels.yml

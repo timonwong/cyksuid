@@ -1,16 +1,12 @@
 import os
 import os.path
-import re
 import subprocess
 import sys
-import sysconfig
 import warnings
-from distutils import util
-from distutils.command import build_ext
 from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
-import pkg_resources
 from setuptools import Extension, setup
+from distutils.command import build_ext
 
 IS_DEBUG = os.getenv("CYKSUID_DEBUG", "") == "1"
 
@@ -120,9 +116,6 @@ class BuildExt(build_ext.build_ext):
 
     def build_extensions(self) -> None:
         is_msvc = self.compiler.compiler_type == "msvc"
-        is_clang = hasattr(self.compiler, "compiler_cxx") and (  # noqa: F841
-            "clang++" in self.compiler.compiler_cxx
-        )
         is_windows = sys.platform[:3] == "win"
         is_mingw = is_windows and (
             self.compiler.compiler_type.lower()
@@ -134,21 +127,6 @@ class BuildExt(build_ext.build_ext):
             check_args += [
                 "-Wno-deprecated-register",
             ]
-
-            # https://developer.apple.com/documentation/xcode_release_notes/xcode_10_release_notes
-            # C++ projects must now migrate to libc++ and are recommended to set a
-            # deployment target of macOS 10.9 or later, or iOS 7 or later.
-            mac_target = str(sysconfig.get_config_var("MACOSX_DEPLOYMENT_TARGET"))
-            if mac_target and (
-                pkg_resources.parse_version(mac_target)
-                < pkg_resources.parse_version("10.9.0")
-            ):
-                os.environ["MACOSX_DEPLOYMENT_TARGET"] = "10.9"
-                os.environ["_PYTHON_HOST_PLATFORM"] = re.sub(
-                    r"macosx-[0-9]+\.[0-9]+-(.+)",
-                    r"macosx-10.9-\1",
-                    util.get_platform(),
-                )
 
         if is_msvc:
             self.extra_compile_args += [
@@ -265,26 +243,9 @@ class BuildExt(build_ext.build_ext):
         print(" ... %s" % ("yes" if is_supported else "no"))
         return is_supported
 
-
-version = "2.0.2"
-parsed_version = pkg_resources.parse_version(version)
-release_status = "Development Status :: 5 - Production/Stable"
-try:
-    if parsed_version.is_prerelease:
-        if "a" in version:
-            release_status = "Development Status :: 3 - Alpha"
-        else:
-            release_status = "Development Status :: 4 - Beta"
-except Exception:
-    if "a" in version:
-        release_status = "Development Status :: 3 - Alpha"
-    elif "b" in version:
-        release_status = "Development Status :: 4 - Beta"
-
-
 setup(
     name="cyksuid",
-    version=version,
+    version="2.1.0",
     description="Cython implementation of ksuid",
     ext_modules=ext_modules,
     cmdclass={"build_ext": BuildExt},
@@ -301,7 +262,7 @@ setup(
     keywords=["ksuid"],
     python_requires=">=3.7",
     classifiers=[
-        release_status,
+        "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: BSD License",
         "Operating System :: OS Independent",
@@ -309,11 +270,12 @@ setup(
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3 :: Only",
-        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
         "Topic :: Scientific/Engineering",
         "Topic :: Software Development",
         "Topic :: Software Development :: Libraries",

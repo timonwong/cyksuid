@@ -46,24 +46,30 @@ on:
       - .github/workflows/wheels.yml
   workflow_dispatch: {}
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
+  PYTHONUNBUFFERED: "1"
   TWINE_NONINTERACTIVE: "1"
 
 jobs:
   sdist:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: setup python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.8"
+          python-version: "3.11"
+          cache: pip
 
       - name: install dependencies
         run: |
-          pip install --upgrade pip build
+          pip install --upgrade pip build pytest setuptools
           pip install -r tools/wheel-requirements.txt
 
       - name: build sdist
@@ -71,7 +77,7 @@ jobs:
           python setup.py build --with-cython
           python -m build --sdist .
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: sdist
           path: "dist/*.tar.gz"
@@ -87,81 +93,94 @@ jobs:
           twine upload --skip-existing dist/*.tar.gz
 
   wheel:
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.os || 'ubuntu-22.04' }}
 
     env:
       MACOSX_DEPLOYMENT_TARGET: "10.9"
       CIBW_TEST_REQUIRES: "pytest"
       CIBW_TEST_COMMAND: "pytest -v {package}/tests"
       CIBW_BUILD: "${{ matrix.cibw.build || '*' }}"
-      # Skip building on CPython 3.6 on all platforms
-      CIBW_SKIP: "cp36-* *-manylinux_i686 *-musllinux_i686 ${{ matrix.cibw.skip || '' }}"
-      CIBW_ARCHS_LINUX: "${{ matrix.cibw.arch || 'auto' }}"
-      CIBW_ARCHS_MACOS: "${{ matrix.cibw.arch || 'auto' }}"
+      CIBW_SKIP: "${{ matrix.cibw.skip || '' }} pp*"  # skip building pypy wheels since broken (pypa/cibuildwheel#2015)
+      CIBW_ARCHS: "${{ matrix.cibw.arch || 'auto' }}"
+      CIBW_MANYLINUX_X86_64_IMAGE: "${{ matrix.cibw.manylinux_x86_64_image || '' }}"
 
     strategy:
       fail-fast: false
       matrix:
         include:
-          - os: macos-11
+          - os: macos-12
             name: mac-cpython
             cibw:
               build: "cp*"
 
-          - os: macos-11
-            name: mac-pypy
-            cibw:
-              build: "pp*"
+          # - os: macos-12
+          #   name: mac-pypy
+          #   cibw:
+          #     build: "pp*"
 
-          - os: macos-11
+          - os: macos-14
             name: mac-arm
             cibw:
               arch: universal2
               build: "cp*"
 
-          - os: ubuntu-20.04
-            name: manylinux-x86_64
+          - name: manylinux-x86_64
             cibw:
               arch: x86_64
               build: "*manylinux*"
 
-          # - os: ubuntu-20.04
-          #   name: manylinux-aarch64
+          # skip due to time_t restrictions
+          # - name: manylinux-i686
           #   cibw:
-          #     arch: aarch64
+          #     arch: i686
           #     build: "*manylinux*"
 
-          - os: ubuntu-20.04
-            name: musllinux
+          # additional manylinux variants, not specified in pyproject.toml:
+          # build with newer 2_28 for cpython >= 3.10, pypy 3.9
+          - name: manylinux-x86_64-2_28
+            cibw:
+              arch: x86_64
+              build: "cp31*-manylinux* pp39-manylinux*"
+              manylinux_x86_64_image: manylinux_2_28
+
+          - name: musllinux
             cibw:
               build: "*musllinux*"
+              skip: "*_i686"
 
-          # - os: ubuntu-20.04
-          #   name: musllinux-arrch64
-          #   cibw:
-          #     arch: aarch64
-          #     build: "*musllinux*"
-
-          - os: windows-2019
-            name: win32
+          - name: win32
+            os: windows-2019
             architecture: x86
             cibw:
               build: "cp*win32"
+              # free-threaded doesn't seem to work on Windows
+              skip: "*t-win*"
 
-          - os: windows-2019
-            name: win-pypy
-            architecture: x64
-            cibw:
-              build: "pp*win_amd64"
+          # - os: windows-2019
+          #   name: win-pypy
+          #   architecture: x64
+          #   cibw:
+          #     build: "pp*win_amd64"
 
           - os: windows-2019
             name: win_amd64
             architecture: x64
             cibw:
               build: "cp*win_amd64"
+              # free-threaded doesn't seem to work on Windows
+              skip: "*t-win*"
+
+          - os: windows-2022
+            name: win_arm64
+            architecture: x64
+            cibw:
+              arch: ARM64
+              # free-threaded doesn't seem to work on Windows
+              skip: "cp37* *t-win*"
+
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       # - name: Set up qemu
       #   id: qemu
@@ -171,9 +190,9 @@ jobs:
       #     platforms: arm64
 
       - name: setup python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.8"
+          python-version: "3.11"
           architecture: ${{ matrix.architecture }}
 
       - name: customize mac-arm-64
@@ -207,7 +226,7 @@ jobs:
         run: |
           python -m cibuildwheel .
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: wheels-${{ matrix.name }}
           path: "wheelhouse/*"

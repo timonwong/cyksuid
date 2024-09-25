@@ -2,7 +2,7 @@ black; platform_python_implementation != "PyPy"
 codecov
 # coverage 5 has issues with Cython: https://github.com/cython/cython/issues/3515
 coverage<5
-cython==3.0.0a11
+cython==3.0.10
 flake8
 mypy; platform_python_implementation != "PyPy"
 pytest
