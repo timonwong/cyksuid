@@ -5,15 +5,12 @@ on:
     branches:
       - master
   pull_request:
-    branches:
-      - master
   workflow_dispatch: {}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-env:
 env:
   FORCE_COLOR: "1"
   # only affects Windows, but easiest to set here for now
